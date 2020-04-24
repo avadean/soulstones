@@ -1,4 +1,3 @@
-# A change.
 
 import person
 
