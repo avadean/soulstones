@@ -1,15 +1,17 @@
 
-import person
+import people
 
 
 if __name__ == '__main__':
 
-    num_dict = { 'null'      : 10,
-                 'water'     : 5,
-                 'fire'      : 3,
-                 'earth'     : 7,
-                 'wind'      : 8,
-                 'light'     : 10,
+    years = 10000
+
+    dict_num = { 'null'      : 10000,
+                 'water'     : 0,
+                 'fire'      : 0,
+                 'earth'     : 0,
+                 'wind'      : 0,
+                 'light'     : 0,
                  'dark'      : 0,
                  'stone'     : 0,
                  'metal'     : 0,
@@ -33,8 +35,32 @@ if __name__ == '__main__':
                 }
 
     persons = []
-    for soul in num_dict:
-        persons += [person.InitialPerson(soul) for n in range(num_dict[soul])]
+    for soul in dict_num:
+        persons += [people.Person(False, False, soul) for n in range(dict_num[soul])]
+
+
+    for year in range(years):
+        for person in persons:
+            person.age_up()
+            person.chance_to_die(year)
+
+        for person in persons:
+            other_people = [p for p in persons if p != person]
+            person.find_partner(other_people)
+
+        for person in persons:
+            child = person.have_child()
+            if child:
+                persons.append(child)
+
+    #for person in persons:
+    #    print(person.soul, 'alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else ''), 'sex=' + person.sex, 'age=' + str(person.age), 'partner=' + str(True if person.partner else False), 'children=' + str(person.num_children))
+
+    for soul in people.dict_souls:
+        print(soul + ' = ' + str(len([True for person in persons if person.soul == soul and person.alive])))
+
+
+
 
 
 
