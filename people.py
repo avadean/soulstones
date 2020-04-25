@@ -1,6 +1,5 @@
 import math
 import numpy.random as npr
-import numba
 
 dict_souls = { 'null'      : [ [ 'null' ] , [ 'fire', 'water', 'wind', 'earth' ] , [ 'light', 'dark'    ] , [ 'stone', 'metal', 'flying', 'ice', 'lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death', 'soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane' ] , [] ] ,
                'water'     : [ [ 'water'            ] , [ 'light', 'null'    ] , [ 'wind'               ] , [ 'earth'                ] , [ 'fire'                 ] ] ,
@@ -64,9 +63,6 @@ class Person:
             probs.append(soul_prob)
             total += soul_prob
 
-        #for num, soul in enumerate(souls):
-        #    print(soul, probs[num])
-
         return npr.choice(souls, p=[prob / total for prob in probs])
 
     def age_up(self):
@@ -84,10 +80,11 @@ class Person:
                 if self.partner:
                     self.partner.partner = False
 
-    def find_partner(self, other_people):
+    def find_partner(self, persons):
         if self.alive and 65 >= self.age >= 18 and not self.partner:
-            potential_partners = [person for person in other_people                               \
-                                  if person.alive and                                             \
+            potential_partners = [person for person in persons                                    \
+                                  if person != self and                                           \
+                                     person.alive and                                             \
                                      person not in [self.father, self.mother] + self.siblings and \
                                      65 >= person.age >= 18 and                                   \
                                      person.sex == ('M' if self.sex == 'F' else 'F')]
