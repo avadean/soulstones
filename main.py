@@ -4,9 +4,9 @@ import people
 
 if __name__ == '__main__':
 
-    years = 10000
+    years = 100
 
-    dict_num = { 'null'      : 75000,
+    dict_num = { 'null'      : 1000,
                  'water'     : 0,
                  'fire'      : 0,
                  'earth'     : 0,
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     #    print(person.soul, 'alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else ''), 'sex=' + person.sex, 'age=' + str(person.age), 'partner=' + str(True if person.partner else False), 'children=' + str(person.num_children))
 
     for soul in people.dict_souls:
-        print(soul + ' = ' + str(len([True for person in persons if person.soul == soul and person.alive])))
+        print(soul + ' = ' + str(len([True for person in persons if person.soul == soul])))
 
 
     with open('info.dat') as f:
