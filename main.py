@@ -69,6 +69,10 @@ if __name__ == '__main__':
     #    print(soul + ' = ' + str(len([True for person in persons if person.soul == soul])))
 
 
+    with open('info.dat') as f:
+        for person in persons:
+            f.write(person.soul, 'alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else ''), 'sex=' + person.sex, 'age=' + str(person.age), 'partner=' + str(True if person.partner else False),          'children=' + str(person.num_children) + '\n')
+
 
 
 
