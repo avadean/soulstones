@@ -1,3 +1,4 @@
+import time
 import math
 import numpy.random as npr
 
@@ -32,8 +33,8 @@ dict_souls = { 'null'      : [ [ 'null' ] , [ 'fire', 'water', 'wind', 'earth' ]
 l = 1.5 # Global float that determines the probability fall-off of accepted souls.
 
 class Person:
-    def __init__(self, father, mother, soul=False):
-        self.age             = 0
+    def __init__(self, father, mother, soul=False, age=0):
+        self.age             = age
         self.sex             = 'M' if npr.random() < 0.5 else 'F'
         self.alive           = True
         self.year_of_death   = False
@@ -43,8 +44,13 @@ class Person:
         self.partner         = False
         self.children        = []
         self.num_children    = 0
-        self.children_wanted = npr.choice([0, 1, 2, 3])
+        self.children_wanted = npr.randint(5) #npr.choice([0, 1, 2, 3])
         self.soul            = soul if soul else self.get_soul()
+
+        self.min_age_partner = 18
+        self.max_age_partner = 65
+        self.min_age_child   = 25
+        self.max_age_child   = 55
 
     def get_soul(self):
         souls = [soul for soul in dict_souls]
@@ -72,7 +78,7 @@ class Person:
     def chance_to_die(self, current_year):
         if self.alive:
             a = 0.00075
-            b = 0.06000
+            b = 0.05000
 
             if npr.random() < a * math.exp(b * float(self.age)):
                 self.alive               = False
@@ -81,6 +87,7 @@ class Person:
                     self.partner.partner = False
 
     def find_partner(self, persons):
+        '''
         if self.alive and 65 >= self.age >= 18 and not self.partner:
             potential_partners = [person for person in persons                                    \
                                   if person != self and                                           \
@@ -92,9 +99,23 @@ class Person:
             if len(potential_partners) > 0:
                 self.partner         = npr.choice(potential_partners)
                 self.partner.partner = self
+        '''
+
+        if self.max_age_partner >= self.age >= self.min_age_partner and not self.partner:
+            for i in range(10): # Try up to 10 times to find a partner.
+                potential_partner = persons[npr.randint(len(persons))] #npr.choice(persons)
+
+                if potential_partner != self and\
+                        potential_partner not in [self.father, self.mother] + self.siblings and\
+                        potential_partner.max_age_partner >= potential_partner.age >= potential_partner.min_age_partner and\
+                        potential_partner.sex == ('M' if self.sex == 'F' else 'F'):
+
+                    self.partner         = potential_partner
+                    self.partner.partner = self
+                    break
 
     def have_child(self):
-        if self.alive and self.partner and self.age >= 25 and self.partner.age >= 25 and self.num_children < self.children_wanted and self.partner.num_children < self.children_wanted:
+        if self.alive and self.partner and self.max_age_child >= self.age >= self.min_age_child and self.partner.max_age_child >= self.partner.age >= self.partner.min_age_child and self.num_children < self.children_wanted and self.partner.num_children < self.children_wanted:
             if self.sex == 'M':
                 child = Person(self, self.partner)
             else:
