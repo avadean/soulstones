@@ -6,7 +6,7 @@ if __name__ == '__main__':
 
     years = 10000
 
-    dict_num = { 'null'      : 10000,
+    dict_num = { 'null'      : 75000,
                  'water'     : 0,
                  'fire'      : 0,
                  'earth'     : 0,
@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
 
     for year in range(years):
+        print('starting year ' + str(year) + ' out of ' + str(years))
         for person in persons:
             person.age_up()
             person.chance_to_die(year)
@@ -59,6 +60,10 @@ if __name__ == '__main__':
     for soul in people.dict_souls:
         print(soul + ' = ' + str(len([True for person in persons if person.soul == soul and person.alive])))
 
+
+    with open('info.dat') as f:
+        for person in persons:
+            f.write(person.soul, 'alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else ''), 'sex=' + person.sex, 'age=' + str(person.age), 'partner=' + str(True if person.partner else False),          'children=' + str(person.num_children) + '\n')
 
 
 
