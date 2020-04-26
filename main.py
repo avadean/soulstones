@@ -1,3 +1,4 @@
+import os
 import math
 import numpy.random as npr
 import time
@@ -7,9 +8,9 @@ import people
 
 if __name__ == '__main__':
 
-    years = 5
+    years = 7500
 
-    dict_num = { 'null'      : 100000,
+    dict_num = { 'null'      : 10,
                  'water'     : 0,
                  'fire'      : 0,
                  'earth'     : 0,
@@ -41,6 +42,11 @@ if __name__ == '__main__':
     for soul in dict_num:
         persons += [people.Person(False, False, soul, math.floor(npr.normal(25, 15))) for n in range(dict_num[soul])]
 
+    #a=people.Person(False, False, 'arcane', 30)
+    #b=people.Person(False, False, 'arcane', 30)
+    #kid=people.Person(a, b)
+    #exit(2)
+
     for year in range(years):
         print('starting year ' + str(year) + ' out of ' + str(years))
 
@@ -49,7 +55,7 @@ if __name__ == '__main__':
             person.age_up()
             person.chance_to_die(year)
 
-        deaths  = [person for person in persons if not person.alive]
+        deaths = [person for person in persons if not person.alive]
         with open('individuals.dat', 'a') as f:
             for person in deaths:
                 f.write(person.soul + ' yearofdeath=' + str(person.year_of_death) + ' sex=' + person.sex + ' age=' + str(person.age) + ' partner=' + str(True if person.partner else     False) + ' children=' + str(person.num_children) + '\n')
@@ -74,10 +80,18 @@ if __name__ == '__main__':
 
         with open('yearlysummary.dat', 'a') as f:
             f.write('year ' + str(year) + ' out of ' + str(years) + '\n')
-            for soul in people.dict_souls:
-                num = len([True for person in persons if person.soul == soul])
-                if num > 0:
-                    f.write(soul + ' = ' + str(num) + '\n')
+            total      = len(persons)
+            total_null = len([True for person in persons if person.soul == 'null'])
+            f.write('total = ' + str(total) + '\n')
+            if total > 0:
+                for soul in people.dict_souls:
+                    num = len([True for person in persons if person.soul == soul])
+                    if num > 0:
+                        if soul == 'null':
+                            f.write(soul + ' = ' + str(num) + ', ' + str(round(100.0 * float(num)/float(total), 2)) + '% of total\n')
+                        else:
+                            f.write(soul + ' = ' + str(num) + ', ' + str(round(100.0 * float(num)/float(total-total_null), 2)) + '% of magical\n')
+            f.write('\n')
 
         start = time.time()
         sls = [person.soul for person in persons]
@@ -115,10 +129,6 @@ if __name__ == '__main__':
 
     with open('individuals.dat', 'a') as f:
         for person in persons:
-            f.write(person.soul + ' alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else '') + ' sex=' + person.sex + ' age=' + str(person.age) + ' partner=' + str(True if person.partner else False) + ' children=' + str(person.num_children) + '\n')
-
-
-
-
+            f.write(person.soul + ' alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else '') + ' sex=' + person.sex + ' age=' + str(person.age) + ' partner=' + str(True if person.partner else False) + ' children=' + str(person.num_children) + '/' + str(person.children_wanted) + '\n')
 
 
