@@ -6,9 +6,56 @@ import time
 import people
 
 
+def calc_probs(gamma):
+    father_list = {} # For each father...
+    for soul_father in people.dict_souls:
+        mother_list = {} # ... and mother combination...
+        for soul_mother in people.dict_souls:
+            prob_list = [] # ... there is a probability list.
+
+            total = 0.0 # To normalise.
+            for soul in people.dict_souls: # Looping through all the possible souls that this new person could be.
+                soul_prob = 0.0 # Probability of being this soul.
+
+                for power, accepted_souls in enumerate(people.dict_souls[soul], 1): # Accepted souls are those that this soul accepts as increasing its chances of occuring.
+                    for accepted_soul in accepted_souls: # There's a list of accepted souls for each power.
+                        num_parents = (1 if soul_father == accepted_soul else 0) + (1 if soul_mother == accepted_soul else 0) # Number of parents that are accepted soul.
+                        if num_parents > 0: # Only increases the chances of this soul occuring if there are parents with this accepted soul.
+                            soul_prob += math.exp(-1 * (gamma ** power) / num_parents)
+
+                prob_list.append(soul_prob)
+                total += soul_prob
+
+            mother_list[soul_mother] = [p / total for p in prob_list]
+
+        father_list[soul_father] = mother_list
+
+    return father_list
+
+def calc_chance_die(a, b):
+    age   = 0
+    prob  = 0.0
+    probs = {}
+
+    while prob <= 1.0:
+        prob       = a * math.exp(b * float(age))
+        probs[age] = prob
+        age       += 1
+
+    return probs
+
+
 if __name__ == '__main__':
 
-    years = 7500
+    gamma       = 1.35 # Determines the probability fall-off of accepted souls.
+    a           = 0.00075
+    b           = 0.05000
+
+    years       = 5000
+
+    souls       = [soul for soul in people.dict_souls]
+    soul_probs  = calc_probs(gamma)
+    death_probs = calc_chance_die(a, b)
 
     dict_num = { 'null'      : 10,
                  'water'     : 0,
@@ -40,7 +87,7 @@ if __name__ == '__main__':
 
     persons = []
     for soul in dict_num:
-        persons += [people.Person(False, False, soul, math.floor(npr.normal(25, 15))) for n in range(dict_num[soul])]
+        persons += [people.Person(False, False, soul_probs, soul, math.floor(npr.normal(25, 15))) for n in range(dict_num[soul])]
 
     #a=people.Person(False, False, 'arcane', 30)
     #b=people.Person(False, False, 'arcane', 30)
@@ -53,7 +100,7 @@ if __name__ == '__main__':
         start = time.time()
         for person in persons:
             person.age_up()
-            person.chance_to_die(year)
+            person.chance_to_die(year, death_probs)
 
         deaths = [person for person in persons if not person.alive]
         with open('individuals.dat', 'a') as f:
@@ -72,7 +119,7 @@ if __name__ == '__main__':
 
         start = time.time()
         for person in persons:
-            child = person.have_child()
+            child = person.have_child(soul_probs)
             if child:
                 persons.append(child)
         end   = time.time()
