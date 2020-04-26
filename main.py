@@ -1,3 +1,4 @@
+import gc
 import os
 import math
 import numpy.random as npr
@@ -46,6 +47,7 @@ def calc_chance_die(a, b):
 
 
 if __name__ == '__main__':
+    START_TOTAL=time.time()
 
     gamma       = 1.35 # Determines the probability fall-off of accepted souls.
     a           = 0.00075
@@ -54,8 +56,17 @@ if __name__ == '__main__':
     years       = 5000
 
     souls       = [soul for soul in people.dict_souls]
+
+    START=time.time()
     soul_probs  = calc_probs(gamma)
+    END=time.time()
+    time_calc_soul_probs=END-START
+
+    START=time.time()
     death_probs = calc_chance_die(a, b)
+    END=time.time()
+    time_calc_death_probs=END-START
+
 
     dict_num = { 'null'      : 10,
                  'water'     : 0,
@@ -85,62 +96,59 @@ if __name__ == '__main__':
                  'arcane'    : 0
                 }
 
+    START=time.time()
     persons = []
     for soul in dict_num:
         persons += [people.Person(False, False, soul_probs, soul, math.floor(npr.normal(25, 15))) for n in range(dict_num[soul])]
+    END=time.time()
+    time_gen_initial_persons=END-START
 
     #a=people.Person(False, False, 'arcane', 30)
     #b=people.Person(False, False, 'arcane', 30)
     #kid=people.Person(a, b)
     #exit(2)
 
+    time_aging_dying=0.0
+    time_writing_deaths=0.0
+    time_finding_partners=0.0
+    time_having_children=0.0
+    time_writing_populations=0.0
+    time_garbage_collecting=0.0
     for year in range(years):
         print('starting year ' + str(year) + ' out of ' + str(years))
 
-        start = time.time()
+        START=time.time()
         for person in persons:
             person.age_up()
             person.chance_to_die(year, death_probs)
+        END=time.time()
+        time_aging_dying+=(END-START)
 
+        START=time.time()
         deaths = [person for person in persons if not person.alive]
         with open('individuals.dat', 'a') as f:
             for person in deaths:
                 f.write(person.soul + ' yearofdeath=' + str(person.year_of_death) + ' sex=' + person.sex + ' age=' + str(person.age) + ' partner=' + str(True if person.partner else     False) + ' children=' + str(person.num_children) + '\n')
+        END=time.time()
+        time_writing_deaths+=(END-START)
 
         persons = [person for person in persons if person.alive]
-        end   = time.time()
-        #print('time to age up ' + str(end - start))
 
-        start = time.time()
+        START=time.time()
         for person in persons:
             person.find_partner(persons)
-        end    = time.time()
-        #print('time to find partners ' + str(end-start))
+        END=time.time()
+        time_finding_partners+=(END-START)
 
-        start = time.time()
+        START=time.time()
         for person in persons:
             child = person.have_child(soul_probs)
             if child:
                 persons.append(child)
-        end   = time.time()
-        #print('time to have children ' + str(end-start))
+        END=time.time()
+        time_having_children+=(END-START)
 
-        with open('yearlysummary.dat', 'a') as f:
-            f.write('year ' + str(year) + ' out of ' + str(years) + '\n')
-            total      = len(persons)
-            total_null = len([True for person in persons if person.soul == 'null'])
-            f.write('total = ' + str(total) + '\n')
-            if total > 0:
-                for soul in people.dict_souls:
-                    num = len([True for person in persons if person.soul == soul])
-                    if num > 0:
-                        if soul == 'null':
-                            f.write(soul + ' = ' + str(num) + ', ' + str(round(100.0 * float(num)/float(total), 2)) + '% of total\n')
-                        else:
-                            f.write(soul + ' = ' + str(num) + ', ' + str(round(100.0 * float(num)/float(total-total_null), 2)) + '% of magical\n')
-            f.write('\n')
-
-        start = time.time()
+        START=time.time()
         sls = [person.soul for person in persons]
         with open('population.dat', 'a') as f:
             f.write(str(year) + ' ' + str(len(sls)) +\
@@ -171,11 +179,58 @@ if __name__ == '__main__':
                                 ' ' + str(sls.count('blood')) +\
                                 ' ' + str(sls.count('arcane')) +\
                     '\n')
-        end = time.time()
-        #print('time' + str(end-start))
+        END=time.time()
+        time_writing_populations+=(END-START)
 
+        '''
+        START=time.time()
+        gc.collect()
+        end=time.time()
+        time_garbage_collecting+=(END-START)
+        '''
+
+    START=time.time()
+    with open('endsummary.dat', 'a') as f:
+        total      = len(persons)
+        total_null = len([True for person in persons if person.soul == 'null'])
+        f.write('total = ' + str(total) + '\n')
+        if total > 0:
+            for soul in people.dict_souls:
+                num = len([True for person in persons if person.soul == soul])
+                if num > 0:
+                    if soul == 'null':
+                        f.write(soul + ' = ' + str(num) + ', ' + str(round(100.0 * float(num)/float(total), 2)) + '% of total\n')
+                    else:
+                        f.write(soul + ' = ' + str(num) + ', ' + str(round(100.0 * float(num)/float(total-total_null), 2)) + '% of magical\n')
+    END=time.time()
+    time_writing_end_summary=(END-START)
+
+    START=time.time()
     with open('individuals.dat', 'a') as f:
         for person in persons:
             f.write(person.soul + ' alive=' + str(person.alive) + (str(person.year_of_death) if not person.alive else '') + ' sex=' + person.sex + ' age=' + str(person.age) + ' partner=' + str(True if person.partner else False) + ' children=' + str(person.num_children) + '/' + str(person.children_wanted) + '\n')
+    END=time.time()
+    time_writing_individuals=END-START
+
+    END_TOTAL=time.time()
+
+    with open('times.dat', 'a') as f:
+        f.write('time calculating soul probabilities  = ' + str(time_calc_soul_probs) + '\n')
+        f.write('time calculating death probabilities = ' + str(time_calc_death_probs) + '\n')
+        f.write('time generating initial persons      = ' + str(time_gen_initial_persons) + '\n')
+        f.write('\n')
+        f.write('time aging and dying                 = ' + str(time_aging_dying) + '\n')
+        f.write('time writing deaths                  = ' + str(time_writing_deaths) + '\n')
+        f.write('time finding partners                = ' + str(time_finding_partners) + '\n')
+        f.write('time having children                 = ' + str(time_having_children) + '\n')
+        f.write('\n')
+        f.write('time writing end summary             = ' + str(time_writing_end_summary) + '\n')
+        f.write('time writing populations             = ' + str(time_writing_populations) + '\n')
+        f.write('time writing individuals             = ' + str(time_writing_individuals) + '\n')
+        f.write('\n')
+        f.write('time garbage collecting              = ' + str(time_garbage_collecting) + '\n')
+        f.write('\n')
+        f.write('total                                = ' + str(END_TOTAL-START_TOTAL) + '\n')
+
 
 
