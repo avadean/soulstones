@@ -2,35 +2,35 @@ import time
 import math
 import numpy.random as npr
 
-dict_souls = { 'null'      : [ [ 'null' ] , [ 'fire', 'water', 'wind', 'earth' ] , [ 'light', 'dark'    ] , [ 'stone', 'metal', 'flying', 'ice', 'lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death', 'soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane' ] , [] ] ,
-               'water'     : [ [ 'water'            ] , [ 'light', 'null'    ] , [ 'wind'               ] , [ 'earth'                ] , [ 'fire'                 ] ] ,
-               'fire'      : [ [ 'fire'             ] , [ 'dark', 'null'     ] , [ 'earth'              ] , [ 'wind'                 ] , [ 'water'                ] ] ,
-               'earth'     : [ [ 'earth'            ] , [                    ] , [ 'null'               ] , [ 'wind'                 ] , [                        ] ] ,
-               'wind'      : [ [ 'wind'             ] , [                    ] , [ 'null'               ] , [ 'earth'                ] , [                        ] ] ,
-               'light'     : [ [ 'light'            ] , [ 'dark', 'water'    ] , [                      ] , [                        ] , [                        ] ] ,
-               'dark'      : [ [ 'dark'             ] , [                    ] , [ 'light', 'fire'      ] , [                        ] , [                        ] ] ,
-               'stone'     : [ [                    ] , [ 'stone'            ] , [ 'metal', 'earth'     ] , [ 'wind'                 ] , [                        ] ] ,
-               'metal'     : [ [                    ] , [ 'metal'            ] , [ 'stone', 'earth'     ] , [ 'wind'                 ] , [                        ] ] ,
-               'flying'    : [ [                    ] , [ 'flying'           ] , [ 'wind'               ] , [                        ] , [                        ] ] ,
-               'ice'       : [ [                    ] , [ 'ice'              ] , [ 'lightning', 'stone' ] , [ 'metal'                ] , [                        ] ] ,
-               'lightning' : [ [                    ] , [ 'lightning'        ] , [ 'ice'      , 'metal' ] , [ 'stone'                ] , [                        ] ] ,
-               'poison'    : [ [                    ] , [ 'poison'           ] , [ 'flying'             ] , [ 'earth', 'wind'        ] , [ 'psychic'              ] ] ,
-               'ghost'     : [ [                    ] , [ 'ghost'            ] , [ 'flying'             ] , [ 'fire', 'water'        ] , [ 'poison'               ] ] ,
-               'psychic'   : [ [                    ] , [ 'psychic'          ] , [ 'flying'             ] , [ 'light', 'dark'        ] , [ 'ghost'                ] ] ,
-               'nuclear'   : [ [                    ] , [ 'nuclear', 'metal' ] , [                      ] , [                        ] , [                        ] ] ,
-               'gravity'   : [ [                    ] , [ 'gravity', 'stone' ] , [                      ] , [                        ] , [                        ] ] ,
-               'life'      : [ [                    ] , [ 'life'             ] , [ 'light', 'dark'      ] , [ 'earth', 'wind'        ] , [ 'fire', 'water'        ] ] ,
-               'death'     : [ [ 'death'            ] , [                    ] , [ 'dark'               ] , [                        ] , [                        ] ] ,
-               'soul'      : [ [                    ] , [                    ] , [ 'soul'               ] , [ 'life'                 ] , [                        ] ] ,
-               'luna'      : [ [                    ] , [                    ] , [ 'luna'               ] , [ 'psychic'              ] , [                        ] ] ,
-               'jade'      : [ [                    ] , [                    ] , [ 'jade'               ] , [ 'ice'                  ] , [                        ] ] ,
-               'dragon'    : [ [                    ] , [                    ] , [ 'dragon'             ] , [ 'lightning'            ] , [                        ] ] ,
-               'dream'     : [ [                    ] , [                    ] , [ 'dream'              ] , [ 'soul', 'luna', 'jade' ] , [                        ] ] ,
-               'blood'     : [ [ 'blood'            ] , [                    ] , [                      ] , [ 'poison'               ] , [                        ] ] ,
-               'arcane'    : [ [ 'arcane'           ] , [                    ] , [                      ] , [                        ] , [ 'soul', 'luna', 'jade' ] ] ,
+dict_souls = { 'null'      : [ [ 'null' ] , [ 'fire', 'water' , 'wind', 'earth' ] , [ 'light', 'dark'    ] , [ 'stone', 'metal', 'flying', 'ice', 'lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death', 'soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane' ] , [] , [] ] ,
+               'water'     : [ [] , [] , [ 'water'            ] , [ 'light', 'null'    ] , [ 'wind'               ] , [ 'earth'                ] , [ 'fire'                 ] ] ,
+               'fire'      : [ [] , [] , [ 'fire'             ] , [ 'dark', 'null'     ] , [ 'earth'              ] , [ 'wind'                 ] , [ 'water'                ] ] ,
+               'earth'     : [ [] , [] , [ 'earth'            ] , [                    ] , [ 'null'               ] , [ 'wind'                 ] , [                        ] ] ,
+               'wind'      : [ [] , [] , [ 'wind'             ] , [                    ] , [ 'null'               ] , [ 'earth'                ] , [                        ] ] ,
+               'light'     : [ [] , [] , [ 'light'            ] , [ 'dark', 'water'    ] , [                      ] , [                        ] , [                        ] ] ,
+               'dark'      : [ [] , [] , [ 'dark'             ] , [                    ] , [ 'light', 'fire'      ] , [                        ] , [                        ] ] ,
+               'stone'     : [ [] , [] , [                    ] , [ 'stone'            ] , [ 'metal', 'earth'     ] , [ 'wind'                 ] , [                        ] ] ,
+               'metal'     : [ [] , [] , [                    ] , [ 'metal'            ] , [ 'stone', 'earth'     ] , [ 'wind'                 ] , [                        ] ] ,
+               'flying'    : [ [] , [] , [                    ] , [ 'flying'           ] , [ 'wind'               ] , [                        ] , [                        ] ] ,
+               'ice'       : [ [] , [] , [                    ] , [ 'ice'              ] , [ 'lightning', 'stone' ] , [ 'metal', 'water'       ] , [                        ] ] ,
+               'lightning' : [ [] , [] , [                    ] , [ 'lightning'        ] , [ 'ice'      , 'metal' ] , [ 'stone', 'fire'        ] , [                        ] ] ,
+               'poison'    : [ [] , [] , [                    ] , [ 'poison'           ] , [ 'flying'             ] , [ 'psychic'              ] , [ 'water', 'dark'        ] ] ,
+               'ghost'     : [ [] , [] , [                    ] , [ 'ghost'            ] , [ 'flying'             ] , [ 'poison'               ] , [ 'fire', 'wind'         ] ] ,
+               'psychic'   : [ [] , [] , [                    ] , [ 'psychic'          ] , [ 'flying'             ] , [ 'ghost'                ] , [ 'earth', 'light'       ] ] ,
+               'nuclear'   : [ [] , [] , [                    ] , [ 'nuclear', 'metal' ] , [                      ] , [                        ] , [                        ] ] ,
+               'gravity'   : [ [] , [] , [                    ] , [ 'gravity', 'stone' ] , [                      ] , [                        ] , [                        ] ] ,
+               'life'      : [ [] , [] , [                    ] , [ 'life'             ] , [ 'light'              ] , [ 'earth', 'wind'        ] , [ 'fire', 'water'        ] ] ,
+               'death'     : [ [] , [ 'death'            ] , [                    ] , [ 'dark'               ] , [                        ] , [                        ] , [] ] ,
+               'soul'      : [ [] , [] , [                    ] , [                    ] , [ 'soul'               ] , [ 'life'                 ] , [                        ] ] ,
+               'luna'      : [ [] , [] , [                    ] , [                    ] , [ 'luna'               ] , [ 'psychic'              ] , [                        ] ] ,
+               'jade'      : [ [] , [] , [                    ] , [                    ] , [ 'jade'               ] , [ 'ice'                  ] , [ 'light'                ] ] ,
+               'dragon'    : [ [] , [] , [                    ] , [                    ] , [ 'dragon'             ] , [ 'lightning'            ] , [ 'dark'                 ] ] ,
+               'dream'     : [ [] , [] , [                    ] , [                    ] , [ 'dream'              ] , [ 'soul', 'luna', 'jade' ] , [                        ] ] ,
+               'blood'     : [ [] , [ 'blood'            ] , [                    ] , [                      ] , [ 'poison'               ] , [                        ] , [] ] ,
+               'arcane'    : [ [] , [ 'arcane'           ] , [                    ] , [                      ] , [                        ] , [ 'soul', 'luna', 'jade' ] , [] ] ,
               }
 
-l = 1.5 # Global float that determines the probability fall-off of accepted souls.
+l = 1.35 # Global float that determines the probability fall-off of accepted souls.
 
 class Person:
     def __init__(self, father, mother, soul=False, age=0):
@@ -68,6 +68,9 @@ class Person:
 
             probs.append(soul_prob)
             total += soul_prob
+
+        #for num, soul in enumerate(souls):
+        #    print(soul + ' = ' + str(round(100.0 * probs[num] / total, 2)) + '%')
 
         return npr.choice(souls, p=[prob / total for prob in probs])
 
@@ -136,8 +139,5 @@ class Person:
             return child
 
         return False
-
-
-
 
 
