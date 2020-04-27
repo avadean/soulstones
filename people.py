@@ -2,7 +2,7 @@ import time
 import math
 import numpy.random as npr
 
-dict_souls = { 'null'      : [ [ 'null', 'null' ] , [ 'fire', 'water' , 'wind', 'earth' , 'light', 'dark' ] , [ 'stone', 'metal', 'flying', 'ice', 'lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death' ] , [ 'soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane' ] , [] , [] ] ,
+dict_souls = { 'null'      : [ [ 'null', 'null', 'null' ] , [ 'fire', 'water' , 'wind', 'earth' , 'light', 'dark' ] , [ 'stone', 'metal', 'flying', 'ice', 'lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death' ] , [ 'soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane' ] , [] , [] ] ,
                'water'     : [ [          ] , [ ] , [ 'water'            ] , [ 'light', 'null'     ] , [ 'wind'               ] , [ 'earth'                ] , [ 'fire'                 ] ] ,
                'fire'      : [ [          ] , [ ] , [ 'fire'             ] , [ 'dark', 'null'      ] , [ 'earth'              ] , [ 'wind'                 ] , [ 'water'                ] ] ,
                'earth'     : [ [          ] , [ ] , [ 'earth'            ] , [                     ] , [ 'null'               ] , [ 'wind'                 ] , [                        ] ] ,
