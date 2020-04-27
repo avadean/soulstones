@@ -53,7 +53,7 @@ if __name__ == '__main__':
     a           = 0.00075
     b           = 0.05000
 
-    years       = 5000
+    years       = 7500
 
     souls       = [soul for soul in people.dict_souls]
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     time_calc_death_probs=END-START
 
 
-    dict_num = { 'null'      : 10,
+    dict_num = { 'null'      : 15,
                  'water'     : 0,
                  'fire'      : 0,
                  'earth'     : 0,

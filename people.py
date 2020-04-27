@@ -112,7 +112,7 @@ class Person:
                 other_child.siblings.append(child)
 
             return child
-
-        return False
+        else:
+            return False
 
 
