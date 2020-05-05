@@ -79,18 +79,39 @@ class Person:
                 self.partner.partner = self
         '''
 
+        if self.soul == 'dream': # Dreams do not find partners - they live on their own far away from society.
+            return
+
         if self.max_age_partner >= self.age >= self.min_age_partner and not self.partner:
-            for i in range(10): # Try up to 10 times to find a partner.
-                potential_partner = persons[npr.randint(len(persons))] #npr.choice(persons)
 
-                if potential_partner != self and\
-                        potential_partner not in [self.father, self.mother] + self.siblings and\
-                        potential_partner.max_age_partner >= potential_partner.age >= potential_partner.min_age_partner and\
-                        potential_partner.sex == ('M' if self.sex == 'F' else 'F'):
+            if self.soul == 'blood': # Bloods tend towards other bloods.
+                bloods = [p for p in persons if p.soul == 'blood']
+                if self.try_partners(3, bloods): # Try up to 3 times to find a blood partner.
+                    return
+            elif self.soul == 'arcane': # Arcanes tend towards other arcanes.
+                arcanes = [p for p in persons if p.soul == 'arcane']
+                if self.try_partners(3, arcanes): # Try up to 3 times to find an arcane partner.
+                    return
 
-                    self.partner         = potential_partner
-                    self.partner.partner = self
-                    break
+            if self.try_partners(10, persons): # Try up to 10 times to find a partner.
+                return
+
+
+    def try_partners(self, attempts, people):
+        for i in range(attempts):
+            potential_partner = people[npr.randint(len(people))]
+
+            if potential_partner != self and\
+                    potential_partner not in [self.father, self.mother] + self.siblings and\
+                    potential_partner.max_age_partner >= potential_partner.age >= potential_partner.min_age_partner and\
+                    potential_partner.sex == ('M' if self.sex == 'F' else 'F'):
+
+                self.partner         = potential_partner
+                self.partner.partner = self
+
+                return True
+
+        return False
 
     def have_child(self, probs):
         if self.alive and self.partner and self.max_age_child >= self.age >= self.min_age_child and self.partner.max_age_child >= self.partner.age >= self.partner.min_age_child and self.num_children < self.children_wanted and self.partner.num_children < self.children_wanted:
