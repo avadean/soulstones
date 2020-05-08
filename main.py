@@ -53,7 +53,7 @@ if __name__ == '__main__':
     a           = 0.00075
     b           = 0.05000
 
-    years       = 7500
+    years       = 500
 
     souls       = [soul for soul in people.dict_souls]
 
