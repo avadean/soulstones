@@ -7,7 +7,7 @@ import time
 import people
 
 
-def calc_probs(gamma):
+def calc_soul_probs(gamma):
     father_list = {} # For each father...
     for soul_father in people.dict_souls:
         mother_list = {} # ... and mother combination...
@@ -46,19 +46,12 @@ def calc_chance_die(a, b):
     return probs
 
 
-if __name__ == '__main__':
+def run(gamma, a, b, years, dict_num):
     START_TOTAL=time.time()
-
-    gamma       = 1.35 # Determines the probability fall-off of accepted souls.
-    a           = 0.00075
-    b           = 0.05000
-
-    years       = 500
-
     souls       = [soul for soul in people.dict_souls]
 
     START=time.time()
-    soul_probs  = calc_probs(gamma)
+    soul_probs  = calc_soul_probs(gamma)
     END=time.time()
     time_calc_soul_probs=END-START
 
@@ -66,35 +59,6 @@ if __name__ == '__main__':
     death_probs = calc_chance_die(a, b)
     END=time.time()
     time_calc_death_probs=END-START
-
-
-    dict_num = { 'null'      : 15,
-                 'water'     : 0,
-                 'fire'      : 0,
-                 'earth'     : 0,
-                 'wind'      : 0,
-                 'light'     : 0,
-                 'dark'      : 0,
-                 'stone'     : 0,
-                 'metal'     : 0,
-                 'flying'    : 0,
-                 'ice'       : 0,
-                 'lightning' : 0,
-                 'poison'    : 0,
-                 'ghost'     : 0,
-                 'psychic'   : 0,
-                 'nuclear'   : 0,
-                 'gravity'   : 0,
-                 'life'      : 0,
-                 'death'     : 0,
-                 'soul'      : 0,
-                 'luna'      : 0,
-                 'jade'      : 0,
-                 'dragon'    : 0,
-                 'dream'     : 0,
-                 'blood'     : 0,
-                 'arcane'    : 0
-                }
 
     START=time.time()
     persons = []
