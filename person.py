@@ -2,7 +2,7 @@ from numpy import arange, ceil, exp, floor
 from numpy.random import choice, normal, random
 from random import choices, randint
 
-from soul import soulTable
+from soul import getSoul, soulTable
 
 MIN_PARTNER_AGE = 16
 MAX_PARTNER_AGE = 65
@@ -72,7 +72,7 @@ def tryChildren(persons: list = None):
             continue
 
         # We have a baby!
-        baby = Person(soul='null',  # TODO: souls.
+        baby = Person(soul=getSoul(A, B),
                       age=0,
                       parents=[A, B],
                       siblings=list(set(A.children + B.children)))
@@ -168,7 +168,7 @@ class Person:
         self.sex = 'M' if random() < 0.5 else 'F'
         self.partner = None
         self.children = []
-        self.numChildrenWanted = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.2, 0.35, 0.2, 0.1])
+        self.numChildrenWanted = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
         self.minChildWantAge = ceil(normal(25, 5))
         self.maxChildWantAge = floor(normal(45, 5))
 

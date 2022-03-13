@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from person import createPersons, chanceOfDeath, tryChildren, tryPartners
-
+from soul import soulTable
 
 def main(initialPop: int = 100, years: int = 100):
     assert type(initialPop) is int
@@ -42,6 +42,12 @@ def main(initialPop: int = 100, years: int = 100):
         newChildren = tryChildren(persons)
 
         persons += newChildren
+
+        soulList = [person.soul for person in persons]
+        print(' '.join([f'{soul:>12}s = {soulList.count(soul):>3}' for soul in soulTable]) + '\n')
+
+    soulList = [person.soul for person in persons]
+    print('\n' + '\n'.join([f'{soul:>12}s = {soulList.count(soul):>3}' for soul in soulTable]) + '\n')
 
     print('average age', round(sum([person.age for person in persons]) / len(persons), 2))
     print('population', len(persons))
