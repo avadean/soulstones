@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 
 from person import createPersons, chanceOfDeath, tryChildren, tryPartners
+#from population import initPopulation, chanceOfDeath as chanceOfDeathPop, createBabies
+#from soul import createNulls
 
 
 def main(initialPop: int = 100, years: int = 100):
@@ -11,6 +13,8 @@ def main(initialPop: int = 100, years: int = 100):
     assert years > 0, 'Need to run for a non-zero number of years.'
 
     persons = createPersons(num=initialPop)
+    from sys import getsizeof
+    print(getsizeof(persons))
 
     for year in range(years):
         print(f'beginning year {year} with pop {len(persons)}')  # ... {persons}')
@@ -56,7 +60,53 @@ def main(initialPop: int = 100, years: int = 100):
 
 if __name__ == '__main__':
     main(initialPop=10000, years=200)
+    #mainPopulation(initialPop=10000, years=200)
 
+
+
+
+
+'''
+def mainPopulation(initialPop: int = 100, years: int = 100):
+    assert type(initialPop) is int
+    assert initialPop > 0, 'Need non-zero initial population.'
+
+    assert type(years) is int
+    assert years > 0, 'Need to run for a non-zero number of years.'
+
+    population = initPopulation(num=initialPop)
+
+    for year in range(years):
+        print(f'beginning year {year} {population}')  # ... {population}')
+
+        # Age up the population by 1.
+        population.ageUp()
+
+        # Impose any deaths.
+        population.deaths(deaths=chanceOfDeathPop(population.ages))
+
+        # Recalculate population and reset some key attributes.
+        population.calibrate()
+
+        # Get number of births.
+        numBirths = population.numBirths()
+
+        # Create soulstones for babies.
+        souls = createNulls(numBirths)  # TODO: soulstones
+
+        # Create new babies.
+        babies = createBabies(souls)
+
+        # Add babies to population.
+        population += babies
+
+    #n = 110
+    #x = [_ for _ in range(n)]
+    #y = #ages
+
+    #plt.plot(x, y)
+    #plt.show()
+'''
 
 
 
