@@ -1,3 +1,3 @@
 
 
-knownSouls = ['null']
+soulTable = {'null'}

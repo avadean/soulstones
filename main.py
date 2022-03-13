@@ -1,4 +1,6 @@
-from person import createPersons
+import matplotlib.pyplot as plt
+
+from person import createPersons, chanceOfDeath, tryChildren, tryPartners
 
 
 def main(initialPop: int = 100, years: int = 100):
@@ -10,13 +12,50 @@ def main(initialPop: int = 100, years: int = 100):
 
     persons = createPersons(num=initialPop)
 
-    print(persons)
+    for year in range(years):
+        if not persons:
+            break
 
-    exit(0)
+        for person in persons:
+            # Set it so no one has had a child this year yet.
+            person.childThisYear = False
+
+            # Age up the population.
+            person.ageUp()
+
+            # See if anyone dies.
+            if chanceOfDeath(person.age):
+                person.die()
+
+                if person.partner is not None:
+                    person.partner.losePartner()
+
+        # Remove dead people.
+        persons = [person for person in persons if person.alive]
+
+        # Set up partners.
+        tryPartners(persons)
+
+        # Try for children.
+        newChildren = tryChildren(persons)
+
+        persons += newChildren
+
+        print(f'year {year} - pop {len(persons)}')  # ... {persons}')
+
+    print('average age', round(sum([person.age for person in persons]) / len(persons), 2))
+    print('population', len(persons))
+
+    n = 110
+    x = [_ for _ in range(n)]
+    y = [len([person for person in persons if person.age == age]) for age in range(n)]
+
+    plt.plot(x, y)
+    plt.show()
 
 
 if __name__ == '__main__':
-    main()
+    main(initialPop=1000, years=200)
 
 
 
