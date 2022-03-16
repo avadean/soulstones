@@ -1,6 +1,6 @@
 from matplotlib.pyplot import plot, show
 
-from person import createPersons, chanceOfDeath, tryChildren, tryPartners
+from person import createPersons, chancesOfDeath, tryChildren, tryPartners
 
 
 def main(initialPop: int = 100, years: int = 100):
@@ -16,7 +16,9 @@ def main(initialPop: int = 100, years: int = 100):
         if not persons:
             break
 
-        for person in persons:
+        deaths = chancesOfDeath(ages=[person.age for person in persons])
+
+        for num, person in enumerate(persons):
             # Set it so no one has had a child this year yet.
             person.childThisYear = False
 
@@ -24,7 +26,7 @@ def main(initialPop: int = 100, years: int = 100):
             person.ageUp()
 
             # See if anyone dies.
-            if chanceOfDeath(person.age):
+            if deaths[num]:
                 person.die()
 
                 if person.partner is not None:
@@ -58,12 +60,21 @@ def main(initialPop: int = 100, years: int = 100):
     x = range(110)
     y = [ages.count(age) for age in x]
 
-    plot(x, y)
-    show()
+    #plot(x, y)
+    #show()
 
 
 if __name__ == '__main__':
-    main(initialPop=100000, years=200)
+    import cProfile
+    import pstats
+
+    with cProfile.Profile() as pr:
+        main(initialPop=10000, years=200)
+
+    stats = pstats.Stats(pr)
+    stats.sort_stats(pstats.SortKey.TIME)
+    stats.print_stats()
+    stats.dump_stats('timeProfiling.dat')
 
 
 

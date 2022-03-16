@@ -18,36 +18,62 @@ deathProbs = INIT_CHANCE_DEATH * exp(EXPO_CHANCE_DEATH * arange(MAX_AGE))
 
 
 def createPersons(num: int = None, minAge: int = 0, maxAge: int = 100):
-    return [Person(soul='null',
-                   age=randint(minAge, maxAge)) for _ in range(num)]
+    persons = [Person(soul='null', age=randint(minAge, maxAge)) for _ in range(num)]
+
+    batchUpdate(persons)
+
+    return persons
 
 
-def chanceOfDeath(age: int = None):
-    assert age <= MAX_AGE, 'Age too high.'
+def chancesOfDeath(ages: list = None):
+    return random(size=len(ages)) < deathProbs[ages]
 
-    return random() < deathProbs[age]
+
+def batchUpdate(persons: list = None):
+    n = len(persons)
+
+    sexes = choice(['M', 'F'], size=n)
+    numChildrenWanteds = choice([0, 1, 2, 3, 4, 5], size=n, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
+    minChildWantAges = ceil(normal(loc=25, scale=5, size=n))
+    maxChildWantAges = floor(normal(loc=45, scale=5, size=n))
+
+    for num, p in enumerate(persons):
+        p.sex = sexes[num]
+        p.numChildrenWanted = numChildrenWanteds[num]
+        p.minChildWantAge = minChildWantAges[num]
+        p.maxChildWantAge = maxChildWantAges[num]
 
 
 def tryChildren(persons: list = None):
     babies = []
 
-    for person in persons:
+    randoms = random(size=len(persons))
+
+    for person, r in zip(persons, randoms):
+        # Random chance to not want children this year and things not working out by chance.
+        if r < 0.125:
+            continue
+
         # Can only have a child if the person has a partner.
         if person.partner is None:
             continue
 
         A, B = person, person.partner
 
-        # Random chance to not want children this year and things not working out by chance.
-        if random() < 0.125:
+        # Check they're not above the age they want to be.
+        if A.age > A.maxChildWantAge or B.age > B.maxChildWantAge:
             continue
 
-        # Check they've not already had a child this year.
-        if A.childThisYear or B.childThisYear:
+        # Check they're at least the age they want to be.
+        if A.age < A.minChildWantAge or B.age < B.minChildWantAge:
             continue
 
         # Check they still want more children.
         if len(A.children) >= A.numChildrenWanted or len(B.children) >= B.numChildrenWanted:
+            continue
+
+        # Check they've not already had a child this year.
+        if A.childThisYear or B.childThisYear:
             continue
 
         # Check they're not too young.
@@ -56,14 +82,6 @@ def tryChildren(persons: list = None):
 
         # Check they're not too old.
         if A.age > MAX_CHILD_AGE or B.age > MAX_CHILD_AGE:
-            continue
-
-        # Check they're at least the age they want to be.
-        if A.age < A.minChildWantAge or B.age < B.minChildWantAge:
-            continue
-
-        # Check they're not above the age they want to be.
-        if A.age > A.maxChildWantAge or B.age > B.maxChildWantAge:
             continue
 
         # We have a baby!
@@ -77,6 +95,8 @@ def tryChildren(persons: list = None):
 
         babies.append(baby)
 
+    batchUpdate(babies)
+
     return babies
 
 
@@ -84,14 +104,17 @@ def tryPartners(persons: list = None):
     # Try "the SINGLE population" number of times to set up partners.
     singlePersons = [person for person in persons if person.partner is None]
 
-    for A in singlePersons:
+    # 'a' attempts of finding love for each person.
+    a = 3
+    potentialPartners = choices(singlePersons, k=a*len(singlePersons))
+
+    for n, A in enumerate(singlePersons):
         '''
         # Select two people at random.
         A, B = choices(singlePersons, k=2)
         '''
 
-        # k attempts of finding love this year.
-        for B in choices(singlePersons, k=3):
+        for B in potentialPartners[n:n+a]:
             '''
             # Random chance things don't work out!
             if random() < 0.5:
@@ -161,12 +184,12 @@ class Person:
         self.siblings = siblings if siblings is not None else []
 
         self.alive = True
-        self.sex = 'M' if random() < 0.5 else 'F'
+        #self.sex = 'M' if random() < 0.5 else 'F'
         self.partner = None
         self.children = []
-        self.numChildrenWanted, = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
-        self.minChildWantAge = ceil(normal(25, 5))
-        self.maxChildWantAge = floor(normal(45, 5))
+        #self.numChildrenWanted, = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
+        #self.minChildWantAge = ceil(normal(25, 5))
+        #self.maxChildWantAge = floor(normal(45, 5))
 
         self.childThisYear = False
 
