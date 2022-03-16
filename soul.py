@@ -95,19 +95,9 @@ soulTable = \
 
 
 def getSoul(A=None, B=None):
-    assert A.sex != B.sex
-
     father, mother = (A, B) if A.sex == 'M' else (B, A)
 
-    soulDict = soulTable.get(father.soul, None)
-
-    assert soulDict is not None, f'Cannot find soulDict for soul {father.soul}'
-
-    soul = soulDict.get(mother.soul, None)
-
-    assert soul is not None, f'Cannot find soul for soul {mother.soul}'
-
-    return soul
+    return soulTable.get(father.soul, None).get(mother.soul, None)
 
 
 '''

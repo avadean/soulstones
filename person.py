@@ -17,30 +17,25 @@ MAX_AGE = 150
 deathProbs = INIT_CHANCE_DEATH * exp(EXPO_CHANCE_DEATH * arange(MAX_AGE))
 
 
-def createPersons(num: int = None, maxAge: int = 100):
-    assert type(num) is int
-    assert type(maxAge) is int
-
+def createPersons(num: int = None, minAge: int = 0, maxAge: int = 100):
     return [Person(soul='null',
-                   age=randint(0, 100)) for _ in range(num)]
+                   age=randint(minAge, maxAge)) for _ in range(num)]
 
 
 def chanceOfDeath(age: int = None):
-    assert type(age) is int
     assert age <= MAX_AGE, 'Age too high.'
 
     return random() < deathProbs[age]
 
 
 def tryChildren(persons: list = None):
-    assert type(persons) is list
-    assert all(type(person) is Person for person in persons)
-
-    partneredPersons = [person for person in persons if person.partner is not None]
-
     babies = []
 
-    for person in partneredPersons:
+    for person in persons:
+        # Can only have a child if the person has a partner.
+        if person.partner is None:
+            continue
+
         A, B = person, person.partner
 
         # Random chance to not want children this year and things not working out by chance.
@@ -86,14 +81,9 @@ def tryChildren(persons: list = None):
 
 
 def tryPartners(persons: list = None):
-    assert type(persons) is list
-    assert all(type(person) is Person for person in persons)
-
     # Try "the SINGLE population" number of times to set up partners.
-
     singlePersons = [person for person in persons if person.partner is None]
 
-    #for _ in range(len(singlePersons)):  # // 2):
     for A in singlePersons:
         '''
         # Select two people at random.
@@ -123,6 +113,7 @@ def tryPartners(persons: list = None):
             # Make sure they're not too young.
             if A.age < MIN_PARTNER_AGE or B.age < MIN_PARTNER_AGE:
                 continue
+
             '''
             # Make sure they're not too old.
             if A.age > MAX_PARTNER_AGE or B.age > MAX_PARTNER_AGE:
@@ -141,6 +132,11 @@ def tryPartners(persons: list = None):
 
 
 class Person:
+    __slots__ = ('soul', 'age', 'parents', 'siblings',
+                 'alive', 'sex', 'partner', 'children',
+                 'numChildrenWanted', 'minChildWantAge', 'maxChildWantAge',
+                 'childThisYear')
+
     def __init__(self, soul: str = 'null', age: int = 0,
                  parents: list = None, siblings: list = None):
 
@@ -168,7 +164,7 @@ class Person:
         self.sex = 'M' if random() < 0.5 else 'F'
         self.partner = None
         self.children = []
-        self.numChildrenWanted = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
+        self.numChildrenWanted, = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
         self.minChildWantAge = ceil(normal(25, 5))
         self.maxChildWantAge = floor(normal(45, 5))
 
@@ -177,6 +173,9 @@ class Person:
     def __repr__(self):
         #return f'{str(id(self))[-5:]}+{str(id(self.partner))[-5:] if self.partner is not None else "None"}     '
         return f'({self.soul}, {self.age})'
+
+    def __bool__(self):
+        return True
 
     def ageUp(self):
         self.age += 1

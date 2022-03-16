@@ -1,7 +1,7 @@
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import plot, show
 
 from person import createPersons, chanceOfDeath, tryChildren, tryPartners
-from soul import soulTable
+
 
 def main(initialPop: int = 100, years: int = 100):
     assert type(initialPop) is int
@@ -10,11 +10,9 @@ def main(initialPop: int = 100, years: int = 100):
     assert type(years) is int
     assert years > 0, 'Need to run for a non-zero number of years.'
 
-    persons = createPersons(num=initialPop)
+    persons = createPersons(num=initialPop, minAge=0, maxAge=100)
 
     for year in range(years):
-        print(f'beginning year {year} with pop {len(persons)}')  # ... {persons}')
-
         if not persons:
             break
 
@@ -43,25 +41,29 @@ def main(initialPop: int = 100, years: int = 100):
 
         persons += newChildren
 
-        soulList = [person.soul for person in persons]
-        print(' '.join([f'{soul:>12}s = {soulList.count(soul):>3}' for soul in soulTable]) + '\n')
+        print(f'ending year {year} with pop {len(persons)}')  # ... {persons}')
 
-    soulList = [person.soul for person in persons]
-    print('\n' + '\n'.join([f'{soul:>12}s = {soulList.count(soul):>3}' for soul in soulTable]) + '\n')
+    with open('individuals.dat', 'w') as f:
+        f.write('\n'.join([f'{person.soul}  {person.age:>3}{person.sex}  partner={bool(person.partner):<5}  children={len(person.children)}/{person.numChildrenWanted}' for person in persons]))
 
-    print('average age', round(sum([person.age for person in persons]) / len(persons), 2))
+    print('')
+
+    if persons:
+        print('average age', round(sum([person.age for person in persons]) / len(persons), 2))
+
     print('population', len(persons))
 
-    n = 110
-    x = [_ for _ in range(n)]
-    y = [len([person for person in persons if person.age == age]) for age in range(n)]
+    ages = [person.age for person in persons]
 
-    plt.plot(x, y)
-    plt.show()
+    x = range(110)
+    y = [ages.count(age) for age in x]
+
+    plot(x, y)
+    show()
 
 
 if __name__ == '__main__':
-    main(initialPop=10000, years=200)
+    main(initialPop=100000, years=200)
 
 
 
