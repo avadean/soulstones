@@ -1,6 +1,5 @@
 from numpy import arange, ceil, exp, floor
-from numpy.random import choice, normal, random
-from random import choices, randint
+from random import choices
 
 from soul import getSoul, soulTable
 
@@ -17,41 +16,43 @@ MAX_AGE = 150
 deathProbs = INIT_CHANCE_DEATH * exp(EXPO_CHANCE_DEATH * arange(MAX_AGE))
 
 
-def createPersons(num: int = None, minAge: int = 0, maxAge: int = 100):
-    persons = [Person(soul='null', age=randint(minAge, maxAge)) for _ in range(num)]
+def createPersons(r, num: int = None, minAge: int = 0, maxAge: int = 100):
+    ages = r.integers(low=minAge, high=maxAge, size=num)
 
-    batchUpdate(persons)
+    persons = [Person(soul='null', age=int(age)) for age in ages]
+
+    batchUpdate(r, persons)
 
     return persons
 
 
-def chancesOfDeath(ages: list = None):
-    return random(size=len(ages)) < deathProbs[ages]
+def chancesOfDeath(r, ages: list = None):
+    return r.random(size=len(ages)) < deathProbs[ages]
 
 
-def batchUpdate(persons: list = None):
+def batchUpdate(r, persons: list = None):
     n = len(persons)
 
-    sexes = choice(['M', 'F'], size=n)
-    numChildrenWanteds = choice([0, 1, 2, 3, 4, 5], size=n, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
-    minChildWantAges = ceil(normal(loc=25, scale=5, size=n))
-    maxChildWantAges = floor(normal(loc=45, scale=5, size=n))
+    sexes = choices(['M', 'F'], k=n)
+    numChildrenWanteds = choices([0, 1, 2, 3, 4, 5], k=n, weights=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
+    minChildWantAges = ceil(r.normal(loc=25, scale=5, size=n))
+    maxChildWantAges = floor(r.normal(loc=45, scale=5, size=n))
 
     for num, p in enumerate(persons):
-        p.sex = sexes[num]
-        p.numChildrenWanted = numChildrenWanteds[num]
-        p.minChildWantAge = minChildWantAges[num]
-        p.maxChildWantAge = maxChildWantAges[num]
+        p.update(sex=sexes[num],
+                 numChildrenWanted=numChildrenWanteds[num],
+                 minChildWantAge=minChildWantAges[num],
+                 maxChildWantAge=maxChildWantAges[num])
 
 
-def tryChildren(persons: list = None):
+def tryChildren(r, persons: list = None):
     babies = []
 
-    randoms = random(size=len(persons))
+    randoms = r.random(size=len(persons)) < 0.125
 
-    for person, r in zip(persons, randoms):
+    for person, rand in zip(persons, randoms):
         # Random chance to not want children this year and things not working out by chance.
-        if r < 0.125:
+        if rand:
             continue
 
         # Can only have a child if the person has a partner.
@@ -95,13 +96,12 @@ def tryChildren(persons: list = None):
 
         babies.append(baby)
 
-    batchUpdate(babies)
+    batchUpdate(r, babies)
 
     return babies
 
 
-def tryPartners(persons: list = None):
-    # Try "the SINGLE population" number of times to set up partners.
+def tryPartners(r, persons: list = None):
     singlePersons = [person for person in persons if person.partner is None]
 
     # 'a' attempts of finding love for each person.
@@ -109,18 +109,7 @@ def tryPartners(persons: list = None):
     potentialPartners = choices(singlePersons, k=a*len(singlePersons))
 
     for n, A in enumerate(singlePersons):
-        '''
-        # Select two people at random.
-        A, B = choices(singlePersons, k=2)
-        '''
-
         for B in potentialPartners[n:n+a]:
-            '''
-            # Random chance things don't work out!
-            if random() < 0.5:
-                continue
-            '''
-
             # Make sure they're not taken. Remember this can be updated mid-loop so we do need this check here.
             if A.partner is not None or B.partner is not None:
                 continue
@@ -199,6 +188,10 @@ class Person:
 
     def __bool__(self):
         return True
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     def ageUp(self):
         self.age += 1

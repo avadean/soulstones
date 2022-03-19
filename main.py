@@ -1,22 +1,25 @@
 from matplotlib.pyplot import plot, show
+from numpy.random import default_rng
+from cProfile import Profile
+from pstats import Stats, SortKey
 
 from person import createPersons, chancesOfDeath, tryChildren, tryPartners
 
 
-def main(initialPop: int = 100, years: int = 100):
+def main(r, initialPop: int = 100, years: int = 100):
     assert type(initialPop) is int
     assert initialPop > 0, 'Need non-zero initial population.'
 
     assert type(years) is int
     assert years > 0, 'Need to run for a non-zero number of years.'
 
-    persons = createPersons(num=initialPop, minAge=0, maxAge=100)
+    persons = createPersons(r, num=initialPop, minAge=0, maxAge=100)
 
     for year in range(years):
-        if not persons:
+        if not len(persons):
             break
 
-        deaths = chancesOfDeath(ages=[person.age for person in persons])
+        deaths = chancesOfDeath(r, ages=[person.age for person in persons])
 
         for num, person in enumerate(persons):
             # Set it so no one has had a child this year yet.
@@ -36,10 +39,10 @@ def main(initialPop: int = 100, years: int = 100):
         persons = [person for person in persons if person.alive]
 
         # Set up partners.
-        tryPartners(persons)
+        tryPartners(r, persons)
 
         # Try for children.
-        newChildren = tryChildren(persons)
+        newChildren = tryChildren(r, persons)
 
         persons += newChildren
 
@@ -65,14 +68,13 @@ def main(initialPop: int = 100, years: int = 100):
 
 
 if __name__ == '__main__':
-    import cProfile
-    import pstats
+    rng = default_rng(seed=None)
 
-    with cProfile.Profile() as pr:
-        main(initialPop=10000, years=200)
+    with Profile() as pr:
+        main(r=rng, initialPop=10000, years=200)
 
-    stats = pstats.Stats(pr)
-    stats.sort_stats(pstats.SortKey.TIME)
+    stats = Stats(pr)
+    stats.sort_stats(SortKey.TIME)
     stats.print_stats()
     stats.dump_stats('timeProfiling.dat')
 
