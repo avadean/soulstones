@@ -4,52 +4,53 @@ from cProfile import Profile
 from pstats import Stats, SortKey
 
 from person import createPersons, chancesOfDeath, tryChildren, tryPartners
+from soul import soulTable
 
 
-def main(r, initialPop: int = 100, years: int = 100):
+def main(r, initialPop: int = 100, years: int = 100, **kwargs):
     assert type(initialPop) is int
     assert initialPop > 0, 'Need non-zero initial population.'
 
     assert type(years) is int
     assert years > 0, 'Need to run for a non-zero number of years.'
 
-    persons = createPersons(r, num=initialPop, minAge=0, maxAge=100)
+    persons = createPersons(r, num=initialPop, minAge=0, maxAge=100, **kwargs)
 
-    for year in range(years):
-        if not len(persons):
-            break
+    with open('deaths.dat', 'w') as fileDeaths:
+        for year in range(years):
+            if not len(persons):
+                break
 
-        deaths = chancesOfDeath(r, ages=[person.age for person in persons])
+            deaths = chancesOfDeath(r, ages=[person.age for person in persons])
 
-        for num, person in enumerate(persons):
-            # Set it so no one has had a child this year yet.
-            person.childThisYear = False
+            for num, person in enumerate(persons):
+                # Set it so no one has had a child this year yet.
+                person.childThisYear = False
 
-            # Age up the population.
-            person.ageUp()
+                # Age up the population.
+                person.ageUp()
 
-            # See if anyone dies.
-            if deaths[num]:
-                person.die()
+                # See if anyone dies.
+                if deaths[num]:
+                    person.die()
 
-                if person.partner is not None:
-                    person.partner.losePartner()
+                    if person.partner is not None:
+                        person.partner.losePartner()
 
-        # Remove dead people.
-        persons = [person for person in persons if person.alive]
+                    fileDeaths.write(str(person) + '\n')
 
-        # Set up partners.
-        tryPartners(r, persons)
+            # Remove dead people.
+            persons = [person for person in persons if person.alive]
 
-        # Try for children.
-        newChildren = tryChildren(r, persons)
+            # Set up partners.
+            tryPartners(persons)
 
-        persons += newChildren
+            # Try for children.
+            newChildren = tryChildren(r, persons)
 
-        print(f'ending year {year} with pop {len(persons)}')  # ... {persons}')
+            persons += newChildren
 
-    with open('individuals.dat', 'w') as f:
-        f.write('\n'.join([f'{person.soul}  {person.age:>3}{person.sex}  partner={bool(person.partner):<5}  children={len(person.children)}/{person.numChildrenWanted}' for person in persons]))
+            print(f'ending year {year} with pop {len(persons)}')  # ... {persons}')
 
     print('')
 
@@ -57,6 +58,17 @@ def main(r, initialPop: int = 100, years: int = 100):
         print('average age', round(sum([person.age for person in persons]) / len(persons), 2))
 
     print('population', len(persons))
+
+    with open('individuals.dat', 'w') as fileIndividuals:
+        for person in persons:
+            fileIndividuals.write(str(person) + '\n')
+
+    with open('summary.dat', 'w') as fileSummary:
+        souls = [person.soul for person in persons]
+
+        for soul in soulTable:
+            c = souls.count(soul)
+            fileSummary.write(f'{soul:>12} : {c:>7}    {100.0 * c / len(souls):5.1f} %\n')
 
     ages = [person.age for person in persons]
 
@@ -70,8 +82,11 @@ def main(r, initialPop: int = 100, years: int = 100):
 if __name__ == '__main__':
     rng = default_rng(seed=None)
 
+    init = {'water': 100,
+            'fire': 100}
+
     with Profile() as pr:
-        main(r=rng, initialPop=10000, years=200)
+        main(r=rng, initialPop=10000, years=200, **init)
 
     stats = Stats(pr)
     stats.sort_stats(SortKey.TIME)

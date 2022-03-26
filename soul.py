@@ -1,103 +1,34 @@
 # from numpy import zeros
+from openpyxl import load_workbook
 
-
-soulTable = \
-    {'null':
-        {'null': 'null',
-         'water': 'null',
-         'fire': 'null',
-         'earth': 'null',
-         'wind': 'null',
-         'light': 'water',
-         'dark': 'fire',
-
-         'death': 'null'},
-
-     'water':
-        {'null': 'null',
-         'water': 'water',
-         'fire': 'water',
-         'earth': 'earth',
-         'wind': 'water',
-         'light': 'null',
-         'dark': 'null',
-
-         'death': 'death'},
-
-     'fire':
-        {'null': 'null',
-         'water': 'water',
-         'fire': 'fire',
-         'earth': 'earth',
-         'wind': 'fire',
-         'light': 'null',
-         'dark': 'null',
-
-         'death': 'death'},
-
-     'earth':
-        {'null': 'null',
-         'water': 'earth',
-         'fire': 'earth',
-         'earth': 'earth',
-         'wind': 'wind',
-         'light': 'null',
-         'dark': 'null',
-
-         'death': 'death'},
-
-     'wind':
-        {'null': 'null',
-         'water': 'water',
-         'fire': 'fire',
-         'earth': 'wind',
-         'wind': 'wind',
-         'light': 'null',
-         'dark': 'null',
-
-         'death': 'death'},
-
-     'light':
-        {'null': 'water',
-         'water': 'water',
-         'fire': 'fire',
-         'earth': 'earth',
-         'wind': 'wind',
-         'light': 'light',
-         'dark': 'dark',
-
-         'death': 'death'},
-
-     'dark':
-        {'null': 'fire',
-         'water': 'null',
-         'fire': 'null',
-         'earth': 'null',
-         'wind': 'null',
-         'light': 'light',
-         'dark': 'death',
-
-         'death': 'death'},
-
-     'death':
-        {'null': 'null',
-         'water': 'death',
-         'fire': 'death',
-         'earth': 'death',
-         'wind': 'death',
-         'light': 'death',
-         'dark': 'death',
-
-         'death': 'death'}
-     }
+soulTable = ['null',
+             'water', 'fire', 'earth', 'wind', 'light',
+             'dark', 'stone', 'metal', 'flying', 'ice',
+             'lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death',
+             'soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane']
 
 # soulTable = {0: 'null'}
+
+path = "/Users/Ava/OneDrive/Documents/writing/Soulstones NEW/Soulstones.xlsx"
+wb_obj = load_workbook(path)
+sheet_obj = wb_obj.active
+cell_obj = sheet_obj['C3' : 'AB28']
+
+soulDict = {fatherSoul: {motherSoul: cell_obj[nF][nM].value
+                         for nM, motherSoul in enumerate(soulTable)}
+            for nF, fatherSoul in enumerate(soulTable)}
 
 
 def getSoul(A=None, B=None):
     father, mother = (A, B) if A.sex == 'M' else (B, A)
 
-    return soulTable.get(father.soul, None).get(mother.soul, None)
+    soul = soulDict.get(father.soul).get(mother.soul)
+
+    soul = 'null' if soul is None else soul
+
+    soul = soul.strip().lower()
+
+    return soul
 
 
 '''

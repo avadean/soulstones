@@ -15,11 +15,25 @@ MAX_AGE = 150
 
 deathProbs = INIT_CHANCE_DEATH * exp(EXPO_CHANCE_DEATH * arange(MAX_AGE))
 
+NUM_CHILDREN_WANTEDS = (0, 1, 2, 3, 4, 5)
+WGT_CHILDREN_WANTEDS = (0.05, 0.1, 0.225, 0.325, 0.2, 0.1)
 
-def createPersons(r, num: int = None, minAge: int = 0, maxAge: int = 100):
+SEXES = ('M', 'F')
+
+
+def createPersons(r, num: int = None,
+                  minAge: int = 0, maxAge: int = 100,
+                  **kwargs):
+
+    assert 'null' not in kwargs, 'No need to specify nulls in souls'
+    assert num >= sum(kwargs.values()), 'Num persons to create less than specified souls'
+
+    souls = sum([[soul] * n for soul, n in kwargs.items()], [])
+    souls += ['null'] * (num - len(souls))
+
     ages = r.integers(low=minAge, high=maxAge, size=num)
 
-    persons = [Person(soul='null', age=int(age)) for age in ages]
+    persons = [Person(soul=soul, age=int(age)) for soul, age in zip(souls, ages)]
 
     batchUpdate(r, persons)
 
@@ -33,16 +47,16 @@ def chancesOfDeath(r, ages: list = None):
 def batchUpdate(r, persons: list = None):
     n = len(persons)
 
-    sexes = choices(['M', 'F'], k=n)
-    numChildrenWanteds = choices([0, 1, 2, 3, 4, 5], k=n, weights=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
+    sexes = choices(SEXES, k=n)
+    numChildrenWanteds = choices(NUM_CHILDREN_WANTEDS, k=n, weights=WGT_CHILDREN_WANTEDS)
     minChildWantAges = ceil(r.normal(loc=25, scale=5, size=n))
     maxChildWantAges = floor(r.normal(loc=45, scale=5, size=n))
 
     for num, p in enumerate(persons):
-        p.update(sex=sexes[num],
-                 numChildrenWanted=numChildrenWanteds[num],
-                 minChildWantAge=minChildWantAges[num],
-                 maxChildWantAge=maxChildWantAges[num])
+        p.sex = sexes[num]
+        p.numChildrenWanted = numChildrenWanteds[num]
+        p.minChildWantAge = minChildWantAges[num]
+        p.maxChildWantAge = maxChildWantAges[num]
 
 
 def tryChildren(r, persons: list = None):
@@ -51,38 +65,38 @@ def tryChildren(r, persons: list = None):
     randoms = r.random(size=len(persons)) < 0.125
 
     for person, rand in zip(persons, randoms):
-        # Random chance to not want children this year and things not working out by chance.
-        if rand:
-            continue
-
         # Can only have a child if the person has a partner.
         if person.partner is None:
             continue
 
+        # Random chance to not want children this year and things not working out by chance.
+        if rand:
+            continue
+
         A, B = person, person.partner
-
-        # Check they're not above the age they want to be.
-        if A.age > A.maxChildWantAge or B.age > B.maxChildWantAge:
-            continue
-
-        # Check they're at least the age they want to be.
-        if A.age < A.minChildWantAge or B.age < B.minChildWantAge:
-            continue
 
         # Check they still want more children.
         if len(A.children) >= A.numChildrenWanted or len(B.children) >= B.numChildrenWanted:
             continue
 
-        # Check they've not already had a child this year.
-        if A.childThisYear or B.childThisYear:
+        # Check they're not above the age they want to be.
+        if A.age > A.maxChildWantAge or B.age > B.maxChildWantAge:
+            continue
+
+        # Check they're not too old.
+        if A.age > MAX_CHILD_AGE or B.age > MAX_CHILD_AGE:
             continue
 
         # Check they're not too young.
         if A.age < MIN_CHILD_AGE or B.age < MIN_CHILD_AGE:
             continue
 
-        # Check they're not too old.
-        if A.age > MAX_CHILD_AGE or B.age > MAX_CHILD_AGE:
+        # Check they've not already had a child this year.
+        if A.childThisYear or B.childThisYear:
+            continue
+
+        # Check they're at least the age they want to be.
+        if A.age < A.minChildWantAge or B.age < B.minChildWantAge:
             continue
 
         # We have a baby!
@@ -101,7 +115,7 @@ def tryChildren(r, persons: list = None):
     return babies
 
 
-def tryPartners(r, persons: list = None):
+def tryPartners(persons: list = None):
     singlePersons = [person for person in persons if person.partner is None]
 
     # 'a' attempts of finding love for each person.
@@ -152,10 +166,11 @@ class Person:
     def __init__(self, soul: str = 'null', age: int = 0,
                  parents: list = None, siblings: list = None):
 
-        assert type(soul) is str
-        soul = soul.strip().lower()
+        #assert type(soul) is str
+        #soul = soul.strip().lower()
         assert soul in soulTable
 
+        '''
         assert type(age) is int
         assert age >= 0, 'Age of person must be >= 0.'
 
@@ -166,6 +181,7 @@ class Person:
         if siblings is not None:
             assert type(siblings) is list
             assert all(type(sibling) is Person for sibling in siblings)
+        '''
 
         self.soul = soul
         self.age = age
@@ -185,6 +201,9 @@ class Person:
     def __repr__(self):
         #return f'{str(id(self))[-5:]}+{str(id(self.partner))[-5:] if self.partner is not None else "None"}     '
         return f'({self.soul}, {self.age})'
+
+    def __str__(self):
+        return f'{self.soul}    {self.age:>3}{self.sex}    alive={self.alive:5<}    partner={bool(self.partner):5<}    children={len(self.children)}/{self.numChildrenWanted}'
 
     def __bool__(self):
         return True
