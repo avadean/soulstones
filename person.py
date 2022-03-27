@@ -1,7 +1,7 @@
 from numpy import arange, ceil, exp, floor
 from random import choices
 
-from soul import getSoul, soulTable
+from soul import createSouls, getSoul, getSouls
 
 MIN_PARTNER_AGE = 16
 MAX_PARTNER_AGE = 65
@@ -26,10 +26,8 @@ def createPersons(r, num: int = None,
                   **kwargs):
 
     assert 'null' not in kwargs, 'No need to specify nulls in souls'
-    assert num >= sum(kwargs.values()), 'Num persons to create less than specified souls'
 
-    souls = sum([[soul] * n for soul, n in kwargs.items()], [])
-    souls += ['null'] * (num - len(souls))
+    souls = createSouls(fill=num, **kwargs)
 
     ages = r.integers(low=minAge, high=maxAge, size=num)
 
@@ -47,12 +45,23 @@ def chancesOfDeath(r, ages: list = None):
 def batchUpdate(r, persons: list = None):
     n = len(persons)
 
+    #numNones = len([person for person in persons if person.soul is None])
+    # To save working out how many Nones we have, just create a random soul for everyone.
+    souls = getSouls(n)
+
     sexes = choices(SEXES, k=n)
     numChildrenWanteds = choices(NUM_CHILDREN_WANTEDS, k=n, weights=WGT_CHILDREN_WANTEDS)
     minChildWantAges = ceil(r.normal(loc=25, scale=5, size=n))
     maxChildWantAges = floor(r.normal(loc=45, scale=5, size=n))
 
+    #counter = 0
+
     for num, p in enumerate(persons):
+        # We only update the souls that aren't None.
+        if p.soul is None:
+            p.soul = souls[num]#[counter]
+            #counter += 1
+
         p.sex = sexes[num]
         p.numChildrenWanted = numChildrenWanteds[num]
         p.minChildWantAge = minChildWantAges[num]
@@ -163,25 +172,8 @@ class Person:
                  'numChildrenWanted', 'minChildWantAge', 'maxChildWantAge',
                  'childThisYear')
 
-    def __init__(self, soul: str = 'null', age: int = 0,
+    def __init__(self, soul: str = None, age: int = 0,
                  parents: list = None, siblings: list = None):
-
-        #assert type(soul) is str
-        #soul = soul.strip().lower()
-        assert soul in soulTable
-
-        '''
-        assert type(age) is int
-        assert age >= 0, 'Age of person must be >= 0.'
-
-        if parents is not None:
-            assert type(parents) is list
-            assert all(type(person) is Person for person in parents)
-
-        if siblings is not None:
-            assert type(siblings) is list
-            assert all(type(sibling) is Person for sibling in siblings)
-        '''
 
         self.soul = soul
         self.age = age
@@ -189,12 +181,8 @@ class Person:
         self.siblings = siblings if siblings is not None else []
 
         self.alive = True
-        #self.sex = 'M' if random() < 0.5 else 'F'
         self.partner = None
         self.children = []
-        #self.numChildrenWanted, = choice([0, 1, 2, 3, 4, 5], size=1, p=[0.05, 0.1, 0.225, 0.325, 0.2, 0.1])
-        #self.minChildWantAge = ceil(normal(25, 5))
-        #self.maxChildWantAge = floor(normal(45, 5))
 
         self.childThisYear = False
 
@@ -203,7 +191,7 @@ class Person:
         return f'({self.soul}, {self.age})'
 
     def __str__(self):
-        return f'{self.soul}    {self.age:>3}{self.sex}    alive={self.alive:5<}    partner={bool(self.partner):5<}    children={len(self.children)}/{self.numChildrenWanted}'
+        return f'{self.soul:>10}    {self.age:>3}{self.sex}    alive={self.alive:5<}    partner={bool(self.partner):5<}    children={len(self.children)}/{self.numChildrenWanted}'
 
     def __bool__(self):
         return True
