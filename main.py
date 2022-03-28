@@ -23,7 +23,7 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 
             deaths = chancesOfDeath(r, ages=[person.age for person in persons])
 
-            for num, person in enumerate(persons):
+            for person, death in zip(persons, deaths):
                 # Set it so no one has had a child this year yet.
                 person.childThisYear = False
 
@@ -31,7 +31,7 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
                 person.ageUp()
 
                 # See if anyone dies.
-                if deaths[num]:
+                if death:
                     person.die()
 
                     if person.partner is not None:
@@ -83,10 +83,10 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 if __name__ == '__main__':
     rng = default_rng(seed=None)
 
-    initPop = 100000
+    initPop = 1_000_000
 
-    init = {'water': 250,
-            'fire': 250,
+    init = {'water': 500,
+            'fire': 500,
             'earth': 250,
             'wind': 250}
 
