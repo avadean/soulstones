@@ -3,8 +3,8 @@ from numpy.random import default_rng
 from cProfile import Profile
 from pstats import Stats, SortKey
 
+from inout import writeIndividuals, writeSummary
 from person import createPersons, chancesOfDeath, tryChildren, tryPartners
-from soul import soulTable
 
 
 def main(r, initialPop: int = 100, years: int = 100, **kwargs):
@@ -52,24 +52,8 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 
             print(f'ending year {year} with pop {len(persons)}')  # ... {persons}')
 
-    print('')
-
-    if persons:
-        print('average age', round(sum([person.age for person in persons]) / len(persons), 2))
-
-    print('population', len(persons))
-
-    with open('individuals.dat', 'w') as fileIndividuals:
-        for person in persons:
-            fileIndividuals.write(str(person) + '\n')
-
-    with open('summary.dat', 'w') as fileSummary:
-        souls = [person.soul for person in persons]
-
-        for soul in soulTable:
-            c = souls.count(soul)
-
-            fileSummary.write(f'{soul:>12} : {c:>7}    {100.0 * c / len(souls):8.3f} %\n')
+    writeIndividuals(persons)
+    writeSummary(persons)
 
     ages = [person.age for person in persons]
 
@@ -83,7 +67,7 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 if __name__ == '__main__':
     rng = default_rng(seed=None)
 
-    initPop = 1_000_000
+    initPop = 100_000
 
     init = {'water': 500,
             'fire': 500,
