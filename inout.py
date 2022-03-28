@@ -17,9 +17,13 @@ def writeIndividuals(persons: list = None):
 
 
 def writeSummary(persons: list = None, soulTbl: list = None):
+    souls = [person.soul for person in persons]
+    cTotal = len(souls)
+
+    if cTotal == 0:
+        return
+
     with open('summary.dat', 'w') as fileSummary:
-        souls = [person.soul for person in persons]
-        cTotal = len(souls)
         cNull = souls.count('null')
 
         fileSummary.write('/==================================================\\\n')
@@ -30,6 +34,9 @@ def writeSummary(persons: list = None, soulTbl: list = None):
 
         souls = [s for s in souls if s != 'null']
         cMagical = len(souls)
+
+        if cMagical == 0:
+            return
 
         fileSummary.write(f'|{"magical":>12} : {cMagical:>7}    {100.0 * cMagical / cTotal:8.3f} % of total     |\n')
         fileSummary.write('|                                                  |\n')
