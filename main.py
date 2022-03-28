@@ -5,6 +5,7 @@ from pstats import Stats, SortKey
 
 from inout import writeIndividuals, writeSummary
 from person import createPersons, chancesOfDeath, tryChildren, tryPartners
+from soul import soulTable
 
 
 def main(r, initialPop: int = 100, years: int = 100, **kwargs):
@@ -53,7 +54,7 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
             print(f'ending year {year} with pop {len(persons)}')  # ... {persons}')
 
     writeIndividuals(persons)
-    writeSummary(persons)
+    writeSummary(persons, soulTable)
 
     ages = [person.age for person in persons]
 

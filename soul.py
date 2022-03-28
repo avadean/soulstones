@@ -1,6 +1,9 @@
 from openpyxl import load_workbook
 from random import choices
 
+from inout import writeSoulDict
+
+
 PATH = "/Users/Ava/OneDrive/Documents/writing/Soulstones NEW/Soulstones.xlsx"
 CELLS = ('C3', 'AB28')
 
@@ -24,7 +27,7 @@ def getSoulDict(souls: list = None, path: str = None, cellRange: tuple = None):
 
     cells = sheet[start:end]
 
-    s = {motherSoul: {fatherSoul: cells[nM][nF].value
+    s = {motherSoul: {fatherSoul: cells[nM][nF].value if cells[nM][nF].value is None else cells[nM][nF].value.lower()
                       for nF, fatherSoul in enumerate(soulTable)}
          for nM, motherSoul in enumerate(soulTable)}
 
@@ -39,16 +42,7 @@ def getSoul(A=None, B=None):
 
     fatherSoul, motherSoul = (A.soul, B.soul) if A.sex == 'M' else (B.soul, A.soul)
 
-    soul = soulDict.get(motherSoul).get(fatherSoul)
-
-    soul = 'null' if soul is None else soul
-
-    soul = soul.strip().lower()
-
-    if soul == 'null':
-        return None
-
-    return soul
+    return soulDict.get(motherSoul).get(fatherSoul)
 
 
 def getSouls(n: int = 0):
@@ -127,3 +121,5 @@ soulProbs = dict(zip(soulTable, probs))
 
 # Soul dictionary from Excel file.
 soulDict = getSoulDict(souls=soulTable, path=PATH, cellRange=CELLS)
+
+writeSoulDict(soulDict)

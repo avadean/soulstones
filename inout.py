@@ -1,4 +1,13 @@
-from soul import soulTable
+
+
+def writeSoulDict(soulDict: dict = None):
+    with open('soulDict.dat', 'w') as fileSoulDict:
+        for fSoul, mSoulDict in soulDict.items():
+            for mSoul, cSoul in mSoulDict.items():
+                fSoul = str(fSoul)
+                mSoul = str(mSoul)
+                cSoul = str(cSoul)
+                fileSoulDict.write(f'{fSoul:>12} + {mSoul:^12} = {cSoul:<12}\n')
 
 
 def writeIndividuals(persons: list = None):
@@ -7,7 +16,7 @@ def writeIndividuals(persons: list = None):
             fileIndividuals.write(str(person) + '\n')
 
 
-def writeSummary(persons: list = None):
+def writeSummary(persons: list = None, soulTbl: list = None):
     with open('summary.dat', 'w') as fileSummary:
         souls = [person.soul for person in persons]
         cTotal = len(souls)
@@ -25,7 +34,6 @@ def writeSummary(persons: list = None):
         fileSummary.write(f'|{"magical":>12} : {cMagical:>7}    {100.0 * cMagical / cTotal:8.3f} % of total     |\n')
         fileSummary.write('|                                                  |\n')
 
-        soulTbl = soulTable.copy()
         soulTbl.remove('null')
 
         for soul in soulTbl:
