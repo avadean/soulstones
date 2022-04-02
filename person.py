@@ -1,4 +1,5 @@
 from numpy import arange, ceil, exp, floor
+from numpy.random import choice
 from random import choices
 
 from inout import writeMythical
@@ -18,6 +19,9 @@ deathProbs = INIT_CHANCE_DEATH * exp(EXPO_CHANCE_DEATH * arange(MAX_AGE))
 
 NUM_CHILDREN_WANTEDS = (0, 1, 2, 3, 4, 5)
 WGT_CHILDREN_WANTEDS = (0.05, 0.1, 0.225, 0.325, 0.2, 0.1)
+
+NUM_CHILDREN_WANTEDS_DEATHS = (0, 1, 2, 3, 4, 5, 6, 7)
+WGT_CHILDREN_WANTEDS_DEATHS = (0.0, 0.05, 0.1, 0.2, 0.25, 0.2, 0.15, 0.05)
 
 SEXES = ('M', 'F')
 
@@ -61,8 +65,13 @@ def batchUpdate(r, persons: list = None):
         elif p.soul in mythicals:
             writeMythical(p)
 
+        # Deaths have a higher numChildrenWanted.
+        ncw = choice(NUM_CHILDREN_WANTEDS_DEATHS, p=WGT_CHILDREN_WANTEDS_DEATHS)\
+            if p.soul == 'death' else numChildrenWanteds[num]
+
+        p.numChildrenWanted = ncw
+
         p.sex = sexes[num]
-        p.numChildrenWanted = numChildrenWanteds[num]
         p.minChildWantAge = minChildWantAges[num]
         p.maxChildWantAge = maxChildWantAges[num]
 
@@ -124,23 +133,40 @@ def tryChildren(r, persons: list = None):
 
 
 def tryPartners(persons: list = None):
-    singlePersons = [person for person in persons if person.partner is None]
+    """ Searches for partners for a list of persons.
+        Death souls will only search for other deaths.
+        Other souls will search for anyone, but with a
+        pre-defined weighting towards other souls. """
 
-    souls = [person.soul for person in singlePersons]
+    # Get the single persons.
+    singles = [person for person in persons if person.partner is None]
 
-    numNulls = souls.count('null')
-    numSouls = len(souls) - numNulls
+    souls = [person.soul for person in singles]
 
-    soulWeights = [(1.0 if s == 'null' else 4.0) for s in souls]
+    # n is for number of.
+    nNulls = souls.count('null')
+    nDeaths = souls.count('death')
+    nOthers = len(souls) - nNulls - nDeaths
 
-    # 'a' attempts of finding love for each person.
+    # a is for attempts of finding love for each person.
     a = 3
-    potentialPartnersNulls = choices(singlePersons, k=a*numNulls)
-    potentialPartnersSouls = choices(singlePersons, k=a*numSouls, weights=soulWeights)
 
-    nullCounter, soulCounter = -1, -1
+    # pp is for potential partners.
+    ppNulls, ppDeaths, ppOthers = [], [], []
 
-    for A in singlePersons:
+    if nNulls > 0:
+        ppNulls = choices(singles, k=a * nNulls)
+
+    if nDeaths > 0:
+        ppDeaths = choices(singles, k=a * nDeaths, weights=[(1.0 if s == 'death' else 0.0) for s in souls])
+
+    if nOthers > 0:
+        ppOthers = choices(singles, k=a*nOthers, weights=[(1.0 if s == 'null' else 4.0) for s in souls])
+
+    # c is for counter.
+    cNull, cDeaths, cOthers = -1, -1, -1
+
+    for A in singles:
         # Make sure they're single.
         if A.partner is not None:
             continue
@@ -156,14 +182,18 @@ def tryPartners(persons: list = None):
         '''
 
         if A.soul == 'null':
-            nullCounter += 1
-            potentialPartners = potentialPartnersNulls[nullCounter : nullCounter + a]
+            cNull += 1
+            pp = ppNulls[cNull : cNull + a]
+
+        elif A.soul == 'death':
+            cDeaths += 1
+            pp = ppDeaths[cDeaths : cDeaths + a]
         else:
-            soulCounter += 1
-            potentialPartners = potentialPartnersSouls[soulCounter : soulCounter + a]
+            cOthers += 1
+            pp = ppOthers[cOthers : cOthers + a]
 
 
-        for B in potentialPartners:
+        for B in pp:
             # Make sure they're single.
             if B.partner is not None:
                 continue

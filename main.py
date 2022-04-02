@@ -78,7 +78,7 @@ if __name__ == '__main__':
             'nuclear': 10,
             'gravity': 10,
             'life': 5,
-            'death': 1}
+            'death': 5}
 
     with Profile() as pr:
         main(r=rng, initialPop=initPop, years=200, **init)

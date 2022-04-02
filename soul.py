@@ -6,6 +6,7 @@ from inout import writeSoulDict
 
 PATH = "/Users/Ava/OneDrive/Documents/writing/Soulstones NEW/Soulstones.xlsx"
 CELLS = ('C3', 'AA27')
+SHEETNAME = 'Grid'
 
 
 def getSoulDict(souls: list = None, path: str = None, cellRange: tuple = None):
@@ -23,7 +24,7 @@ def getSoulDict(souls: list = None, path: str = None, cellRange: tuple = None):
 
     workbook = load_workbook(filename=PATH, read_only=True, data_only=True)
 
-    sheet = workbook.active
+    sheet = workbook.get_sheet_by_name(SHEETNAME)
 
     cells = sheet[start:end]
 
