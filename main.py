@@ -59,12 +59,26 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 if __name__ == '__main__':
     rng = default_rng(seed=None)
 
-    initPop = 10_000
+    initPop = 1_000_000
 
-    init = {'water': 500,
-            'fire': 500,
-            'earth': 250,
-            'wind': 250}
+    init = {'water': 40000,
+            'fire': 40000,
+            'earth': 20000,
+            'wind': 20000,
+            'light': 10000,
+            'dark': 5000,
+            'stone': 2500,
+            'metal': 2500,
+            'flying': 2500,
+            'ice': 2500,
+            'lightning': 1000,
+            'poison': 1000,
+            'ghost': 1000,
+            'psychic': 1000,
+            'nuclear': 1000,
+            'gravity': 1000,
+            'life': 500,
+            'death': 5}
 
     with Profile() as pr:
         main(r=rng, initialPop=initPop, years=200, **init)
