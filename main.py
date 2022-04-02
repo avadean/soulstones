@@ -59,7 +59,7 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 if __name__ == '__main__':
     rng = default_rng(seed=None)
 
-    initPop = 100_000
+    initPop = 10_000
 
     init = {'water': 500,
             'fire': 500,

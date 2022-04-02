@@ -51,9 +51,7 @@ def getSoul(A=None, B=None):
 
     if s is None:
         return 'null'
-    if s != 'null':
-        with open('temp.dat', 'a') as f:
-            f.write(f'{motherSoul}  {fatherSoul}  {s}\n')
+
     return s
 
 
@@ -99,10 +97,10 @@ legendaries = ['soul', 'luna', 'dragon', 'dream', 'blood', 'arcane']
 mythicals = ['sapphire', 'emerald', 'ruby', 'diamond', 'jade', 'pearl']
 
 # Probability of falling into a rarity of soul.
-probUncommon = 0.2
-probRare = 0.02
-probEpic = 0.002
-probLegendary = 0.0002
+probUncommon = 0.01
+probRare = 0.001
+probEpic = 0.0001
+probLegendary = 0.00001
 probMythical = 0.0
 probCommon = 1.0 - probUncommon - probRare - probEpic - probLegendary - probMythical
 

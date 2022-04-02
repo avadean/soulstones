@@ -2,7 +2,7 @@ from numpy import arange, ceil, exp, floor
 from random import choices
 
 from inout import writeMythical
-from soul import createSouls, getSoul, mythicals
+from soul import createSouls, getSoul, getSouls, mythicals
 
 MIN_PARTNER_AGE = 16
 MAX_PARTNER_AGE = 65
@@ -46,19 +46,31 @@ def chancesOfDeath(r, ages: list = None):
 def batchUpdate(r, persons: list = None):
     n = len(persons)
 
+    # To save working out how many nulls we have, just create a random soul for everyone (most will still be nulls).
+    souls = getSouls(n)
+
     sexes = choices(SEXES, k=n)
     numChildrenWanteds = choices(NUM_CHILDREN_WANTEDS, k=n, weights=WGT_CHILDREN_WANTEDS)
     minChildWantAges = ceil(r.normal(loc=25, scale=5, size=n))
     maxChildWantAges = floor(r.normal(loc=45, scale=5, size=n))
 
+    nCounter, oCounter = 0, 0
     for num, p in enumerate(persons):
-        if p.soul in mythicals:
-            writeMythical(p)
+        if p.soul == 'null':
+            nCounter += 1
+            p.soul = souls[num]
+
+        else:
+            oCounter += 1
+            if p.soul in mythicals:
+                writeMythical(p)
 
         p.sex = sexes[num]
         p.numChildrenWanted = numChildrenWanteds[num]
         p.minChildWantAge = minChildWantAges[num]
         p.maxChildWantAge = maxChildWantAges[num]
+
+    print(f'nCounter={nCounter}     oCounter={oCounter}')
 
 
 def tryChildren(r, persons: list = None):
