@@ -1,3 +1,4 @@
+from collections import Counter
 
 
 def writeSoulDict(soulDict: dict = None):
@@ -8,6 +9,14 @@ def writeSoulDict(soulDict: dict = None):
                 mSoul = str(mSoul)
                 cSoul = str(cSoul)
                 fileSoulDict.write(f'{fSoul:>12} + {mSoul:^12} = {cSoul:<12}\n')
+
+
+def writeInit(persons: list = None):
+    souls = Counter([person.soul for person in persons])
+
+    with open('init.dat', 'w') as fileInit:
+        for soul, numSoul in souls.items():
+            fileInit.write(f'{soul:>12} : {numSoul:>9}\n')
 
 
 def writeIndividuals(persons: list = None):

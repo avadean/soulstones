@@ -28,6 +28,7 @@ SEXES = ('M', 'F')
 
 def createPersons(r, num: int = None,
                   minAge: int = 0, maxAge: int = 100,
+                  leaveNulls: bool = False,
                   **kwargs):
 
     assert 'null' not in kwargs, 'No need to specify nulls in souls'
@@ -38,7 +39,7 @@ def createPersons(r, num: int = None,
 
     persons = [Person(soul=soul, age=int(age)) for soul, age in zip(souls, ages)]
 
-    batchUpdate(r, persons)
+    batchUpdate(r, persons, leaveNulls=leaveNulls)
 
     return persons
 
@@ -47,7 +48,7 @@ def chancesOfDeath(r, ages: list = None):
     return r.random(size=len(ages)) < deathProbs[ages]
 
 
-def batchUpdate(r, persons: list = None):
+def batchUpdate(r, persons: list = None, leaveNulls: bool = False):
     n = len(persons)
 
     # To save working out how many nulls we have, just create a random soul for everyone (most will still be nulls).
@@ -59,10 +60,10 @@ def batchUpdate(r, persons: list = None):
     maxChildWantAges = floor(r.normal(loc=45, scale=5, size=n))
 
     for num, p in enumerate(persons):
-        if p.soul == 'null':
+        if p.soul == 'null' and not leaveNulls:
             p.soul = souls[num]
 
-        elif p.soul in mythicals:
+        if p.soul in mythicals:
             writeMythical(p)
 
         # Deaths have a higher numChildrenWanted.

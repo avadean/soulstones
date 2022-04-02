@@ -2,7 +2,7 @@ from numpy.random import default_rng
 from cProfile import Profile
 from pstats import Stats, SortKey
 
-from inout import writeIndividuals, writeSummary
+from inout import writeIndividuals, writeInit, writeSummary
 from person import createPersons, chancesOfDeath, tryChildren, tryPartners
 from soul import soulTable
 
@@ -14,7 +14,9 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
     assert type(years) is int
     assert years > 0, 'Need to run for a non-zero number of years.'
 
-    persons = createPersons(r, num=initialPop, minAge=0, maxAge=100, **kwargs)
+    persons = createPersons(r, num=initialPop, minAge=0, maxAge=100, leaveNulls=True, **kwargs)
+
+    writeInit(persons)
 
     with open('deaths.dat', 'w') as fileDeaths:
         for year in range(years):
@@ -59,26 +61,26 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 if __name__ == '__main__':
     rng = default_rng(seed=None)
 
-    initPop = 10_000
+    initPop = 2_000_000
 
-    init = {'water': 400,
-            'fire': 400,
-            'earth': 200,
-            'wind': 200,
-            'light': 100,
-            'dark': 50,
-            'stone': 25,
-            'metal': 25,
-            'flying': 25,
-            'ice': 25,
-            'lightning': 10,
-            'poison': 10,
-            'ghost': 10,
-            'psychic': 10,
-            'nuclear': 10,
-            'gravity': 10,
-            'life': 5,
-            'death': 5}
+    init = {'water': 50000,
+            'fire': 50000,
+            'earth': 25000,
+            'wind': 25000,
+            'light': 10000,
+            'dark': 5000,
+            'stone': 2500,
+            'metal': 2500,
+            'flying': 2500,
+            'ice': 2500,
+            'lightning': 1000,
+            'poison': 1000,
+            'ghost': 1000,
+            'psychic': 1000,
+            'nuclear': 1000,
+            'gravity': 1000,
+            'life': 100,
+            'death': 100}
 
     with Profile() as pr:
         main(r=rng, initialPop=initPop, years=200, **init)
