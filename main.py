@@ -1,4 +1,3 @@
-from matplotlib.pyplot import plot, show
 from numpy.random import default_rng
 from cProfile import Profile
 from pstats import Stats, SortKey
@@ -55,14 +54,6 @@ def main(r, initialPop: int = 100, years: int = 100, **kwargs):
 
     writeIndividuals(persons)
     writeSummary(persons, soulTable)
-
-    ages = [person.age for person in persons]
-
-    x = range(110)
-    y = [ages.count(age) for age in x]
-
-    #plot(x, y)
-    #show()
 
 
 if __name__ == '__main__':

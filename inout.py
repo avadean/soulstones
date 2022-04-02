@@ -16,6 +16,11 @@ def writeIndividuals(persons: list = None):
             fileIndividuals.write(str(person) + '\n')
 
 
+def writeMythical(person=None):
+    with open('mythicals.dat', 'a') as fileMythicals:
+        fileMythicals.write(str(person) + '\n')
+
+
 def writeSummary(persons: list = None, soulTbl: list = None):
     souls = [person.soul for person in persons]
     cTotal = len(souls)

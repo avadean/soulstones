@@ -1,11 +1,11 @@
 from openpyxl import load_workbook
-from random import choices
+from random import choices, shuffle
 
 from inout import writeSoulDict
 
 
 PATH = "/Users/Ava/OneDrive/Documents/writing/Soulstones NEW/Soulstones.xlsx"
-CELLS = ('C3', 'AB28')
+CELLS = ('C3', 'AA27')
 
 
 def getSoulDict(souls: list = None, path: str = None, cellRange: tuple = None):
@@ -27,7 +27,7 @@ def getSoulDict(souls: list = None, path: str = None, cellRange: tuple = None):
 
     cells = sheet[start:end]
 
-    s = {motherSoul: {fatherSoul: cells[nM][nF].value if cells[nM][nF].value is None else cells[nM][nF].value.lower()
+    s = {motherSoul: {fatherSoul: None if cells[nM][nF].value is None else cells[nM][nF].value.lower()
                       for nF, fatherSoul in enumerate(soulTable)}
          for nM, motherSoul in enumerate(soulTable)}
 
@@ -42,7 +42,19 @@ def getSoul(A=None, B=None):
 
     fatherSoul, motherSoul = (A.soul, B.soul) if A.sex == 'M' else (B.soul, A.soul)
 
-    return soulDict.get(motherSoul).get(fatherSoul)
+    fromMother = soulDict.get(motherSoul, None)
+
+    if fromMother is None:
+        return 'null'
+
+    s = fromMother.get(fatherSoul, None)
+
+    if s is None:
+        return 'null'
+    if s != 'null':
+        with open('temp.dat', 'a') as f:
+            f.write(f'{motherSoul}  {fatherSoul}  {s}\n')
+    return s
 
 
 def getSouls(n: int = 0):
@@ -54,7 +66,7 @@ def getSouls(n: int = 0):
     return choices(soulTable, k=n, weights=probs)
 
 
-def createSouls(fill: int = None, **kwargs):
+def createSouls(fill: int = None, randomise: bool = False, **kwargs):
     """ Create souls based on soul type given in kwargs.
         If fill is specified then any remaining souls that
         have no explicit type are given null. """
@@ -63,13 +75,17 @@ def createSouls(fill: int = None, **kwargs):
         assert type(fill) is int
         assert fill >= sum(kwargs.values()), 'Null filler less than number of specified souls'
 
-    assert all(s in soulTable for s in kwargs)
-    assert all(type(v) is int for v in kwargs.values())
+    assert type(randomise) is bool
+
+    assert all((s in soulTable and type(v) is int) for s, v in kwargs.items())
 
     souls = sum([[soul] * n for soul, n in kwargs.items()], [])
 
     if fill is not None:
         souls += ['null'] * (fill - len(souls))
+
+    if randomise:
+        shuffle(souls)
 
     return souls
 
@@ -79,20 +95,23 @@ commons = ['null']
 uncommons = ['water', 'fire', 'earth', 'wind', 'light']
 rares = ['dark', 'stone', 'metal', 'flying', 'ice']
 epics = ['lightning', 'poison', 'ghost', 'psychic', 'nuclear', 'gravity', 'life', 'death']
-legendaries = ['soul', 'luna', 'jade', 'dragon', 'dream', 'blood', 'arcane']
+legendaries = ['soul', 'luna', 'dragon', 'dream', 'blood', 'arcane']
+mythicals = ['sapphire', 'emerald', 'ruby', 'diamond', 'jade', 'pearl']
 
 # Probability of falling into a rarity of soul.
-probUncommon = 0.01
-probRare = 0.001
-probEpic = 0.0001
-probLegendary = 0.00001
-probCommon = 1.0 - probUncommon - probRare - probEpic - probLegendary
+probUncommon = 0.2
+probRare = 0.02
+probEpic = 0.002
+probLegendary = 0.0002
+probMythical = 0.0
+probCommon = 1.0 - probUncommon - probRare - probEpic - probLegendary - probMythical
 
 # Probability of each soul in each rarity category.
 probUncommons = [0.25, 0.25, 0.2, 0.2, 0.1]
 probRares = [0.4, 0.15, 0.15, 0.15, 0.15]
 probEpics = [0.2, 0.2, 0.15, 0.15, 0.1, 0.1, 0.05, 0.05]
-probLegendaries = [0.2, 0.2, 0.2, 0.125, 0.125, 0.075, 0.075]
+probLegendaries = [0.2, 0.2, 0.175, 0.175, 0.125, 0.125]
+probMythicals = [1.0 / 6.0] * 6
 probCommons = [1.0]
 
 # Getting the overall probability of a soul.
@@ -100,6 +119,7 @@ probUncommons = [p * probUncommon for p in probUncommons]
 probRares = [p * probRare for p in probRares]
 probEpics = [p * probEpic for p in probEpics]
 probLegendaries = [p * probLegendary for p in probLegendaries]
+probMythicals = [p * probMythical for p in probMythicals]
 probCommons = [p * probCommon for p in probCommons]
 
 # Compile probabilities together.
@@ -107,14 +127,16 @@ probs = probCommons\
         + probUncommons\
         + probRares\
         + probEpics\
-        + probLegendaries
+        + probLegendaries#\
+        #+ probMythicals
 
 # Compile souls together.
 soulTable = commons\
             + uncommons\
             + rares\
             + epics\
-            + legendaries
+            + legendaries#\
+            #+ mythicals
 
 # Zipped up dictionary if needed.
 soulProbs = dict(zip(soulTable, probs))

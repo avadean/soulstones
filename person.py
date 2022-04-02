@@ -1,7 +1,8 @@
 from numpy import arange, ceil, exp, floor
 from random import choices
 
-from soul import createSouls, getSoul, getSouls
+from inout import writeMythical
+from soul import createSouls, getSoul, mythicals
 
 MIN_PARTNER_AGE = 16
 MAX_PARTNER_AGE = 65
@@ -45,22 +46,14 @@ def chancesOfDeath(r, ages: list = None):
 def batchUpdate(r, persons: list = None):
     n = len(persons)
 
-    #numNones = len([person for person in persons if person.soul is None])
-    # To save working out how many Nones we have, just create a random soul for everyone.
-    souls = getSouls(n)
-
     sexes = choices(SEXES, k=n)
     numChildrenWanteds = choices(NUM_CHILDREN_WANTEDS, k=n, weights=WGT_CHILDREN_WANTEDS)
     minChildWantAges = ceil(r.normal(loc=25, scale=5, size=n))
     maxChildWantAges = floor(r.normal(loc=45, scale=5, size=n))
 
-    #counter = 0
-
     for num, p in enumerate(persons):
-        # We only update the souls that aren't None.
-        if p.soul is None:
-            p.soul = souls[num]#[counter]
-            #counter += 1
+        if p.soul in mythicals:
+            writeMythical(p)
 
         p.sex = sexes[num]
         p.numChildrenWanted = numChildrenWanteds[num]
@@ -126,13 +119,20 @@ def tryChildren(r, persons: list = None):
 
 def tryPartners(persons: list = None):
     singlePersons = [person for person in persons if person.partner is None]
+    nonNullPersons = [person for person in singlePersons if person.soul != 'null']
 
     # 'a' attempts of finding love for each person.
     a = 3
-    potentialPartners = choices(singlePersons, k=a*len(singlePersons))
+    #potentialPartners = choices(singlePersons, k=a*len(singlePersons))
 
     for n, A in enumerate(singlePersons):
-        for B in potentialPartners[n:n+a]:
+
+        if A.soul == 'null':
+            potentialPartners = choices(singlePersons, k=a)
+        else:
+            potentialPartners = choices(nonNullPersons, k=a)
+
+        for B in potentialPartners:#[n:n+a]:
             # Make sure they're not taken. Remember this can be updated mid-loop so we do need this check here.
             if A.partner is not None or B.partner is not None:
                 continue
