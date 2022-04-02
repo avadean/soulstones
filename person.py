@@ -125,22 +125,47 @@ def tryChildren(r, persons: list = None):
 
 def tryPartners(persons: list = None):
     singlePersons = [person for person in persons if person.partner is None]
-    nonNullPersons = [person for person in singlePersons if person.soul != 'null']
+
+    souls = [person.soul for person in singlePersons]
+
+    numNulls = souls.count('null')
+    numSouls = len(souls) - numNulls
+
+    soulWeights = [(1.0 if s == 'null' else 4.0) for s in souls]
 
     # 'a' attempts of finding love for each person.
     a = 3
-    #potentialPartners = choices(singlePersons, k=a*len(singlePersons))
+    potentialPartnersNulls = choices(singlePersons, k=a*numNulls)
+    potentialPartnersSouls = choices(singlePersons, k=a*numSouls, weights=soulWeights)
 
-    for n, A in enumerate(singlePersons):
+    nullCounter, soulCounter = -1, -1
+
+    for A in singlePersons:
+        # Make sure they're single.
+        if A.partner is not None:
+            continue
+
+        # Make sure they're not too young.
+        if A.age < MIN_PARTNER_AGE:
+            continue
+
+        '''
+        # Make sure they're not too old.
+        if A.age > MAX_PARTNER_AGE:
+            continue
+        '''
 
         if A.soul == 'null':
-            potentialPartners = choices(singlePersons, k=a)
+            nullCounter += 1
+            potentialPartners = potentialPartnersNulls[nullCounter : nullCounter + a]
         else:
-            potentialPartners = choices(nonNullPersons, k=a)
+            soulCounter += 1
+            potentialPartners = potentialPartnersSouls[soulCounter : soulCounter + a]
 
-        for B in potentialPartners:#[n:n+a]:
-            # Make sure they're not taken. Remember this can be updated mid-loop so we do need this check here.
-            if A.partner is not None or B.partner is not None:
+
+        for B in potentialPartners:
+            # Make sure they're single.
+            if B.partner is not None:
                 continue
 
             # Gotta be able to make babies! This will also catch if A==B.
@@ -152,12 +177,12 @@ def tryPartners(persons: list = None):
                 continue
 
             # Make sure they're not too young.
-            if A.age < MIN_PARTNER_AGE or B.age < MIN_PARTNER_AGE:
+            if B.age < MIN_PARTNER_AGE:
                 continue
 
             '''
             # Make sure they're not too old.
-            if A.age > MAX_PARTNER_AGE or B.age > MAX_PARTNER_AGE:
+            if B.age > MAX_PARTNER_AGE:
                 continue
             '''
 
